@@ -1,0 +1,30 @@
+{
+	"parent": "minecraft:recipes/root",
+	"rewards": {
+		"recipes": [
+			"guncraft:itemshotgunshellincendiary"
+		]
+	},
+	"criteria": {
+		"has_shell": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [{
+					"item": "guncraft:itemshotgunshell"
+				}]
+			}
+		},
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipe": "guncraft:itemshotgunshellincendiary"
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_shell",			
+			"has_the_recipe"
+		]
+	]
+}

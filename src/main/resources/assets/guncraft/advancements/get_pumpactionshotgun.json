@@ -1,0 +1,28 @@
+{
+	"display": {
+		"icon": {
+			"item": "guncraft:itempumpactionshotgun"
+		},
+		"title": {
+			"translate": "advancements.guncraft.get_pumpactionshotgun.title"
+		},
+		"description": {
+			"translate": "advancements.guncraft.get_pumpactionshotgun.description"
+		},
+		"frame": "task"
+	},
+	"parent": "guncraft:get_musket",
+	"rewards": {
+		"experience": 50
+	},
+	"criteria": {
+		"has_pumpactionshotgun": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [{
+					"item": "guncraft:itempumpactionshotgun"
+				}]
+			}
+		}
+	}
+}

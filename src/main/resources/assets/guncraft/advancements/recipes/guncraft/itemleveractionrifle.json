@@ -1,0 +1,42 @@
+{
+	"parent": "minecraft:recipes/root",
+	"rewards": {
+		"recipes": [
+			"guncraft:itemleveractionrifle"
+		]
+	},
+	"criteria": {
+		"has_unlocked_musket": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipe": "guncraft:itemmusket"
+			}
+
+		},
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipe": "guncraft:itemleveractionrifle"
+			}
+		},
+		"has_blaze_powder": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [{
+					"item": "minecraft:blaze_powder"
+				}]
+			}
+		}
+	},
+
+	"requirements": [
+		[
+			"has_unlocked_musket",
+			"has_the_recipe"
+		],
+		[
+			"has_blaze_powder",
+			"has_the_recipe"
+		]
+	]
+}

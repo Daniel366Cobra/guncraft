@@ -1,0 +1,28 @@
+{
+	"display": {
+		"icon": {
+			"item": "minecraft:blaze_powder"
+		},
+		"title": {
+			"translate": "advancements.guncraft.get_blaze_powder.title"
+		},
+		"description": {
+			"translate": "advancements.guncraft.get_blaze_powder.description"
+		},
+		"frame": "goal"
+	},
+	"parent": "guncraft:get_gunpowder",
+	"rewards": {
+		"experience": 100
+	},
+	"criteria": {
+		"has_blaze_powder": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [{
+					"item": "minecraft:blaze_powder"
+				}]
+			}
+		}
+	}
+}

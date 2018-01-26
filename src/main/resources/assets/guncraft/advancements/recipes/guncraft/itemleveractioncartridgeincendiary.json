@@ -1,0 +1,30 @@
+{
+	"parent": "minecraft:recipes/root",
+	"rewards": {
+		"recipes": [
+			"guncraft:itemleveractioncartridgeincendiary"
+		]
+	},
+	"criteria": {
+		"has_cartridge": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [{
+					"item": "guncraft:itemleveractioncartridge"
+				}]
+			}
+		},
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipe": "guncraft:itemleveractioncartridgeincendiary"
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_cartridge",			
+			"has_the_recipe"
+		]
+	]
+}

@@ -1,0 +1,14 @@
+[
+{
+  "modid": "guncraft",
+  "name": "GunCraft",
+  "description": "Leave bows to elves! Grab a 12-gauge and get those pesky zombies off your lawn.",
+  "version": "0.01",
+  "mcversion": "1.11",
+  "authorList": ["Daniel366Cobra"],
+  "credits": "The Forge and FML devs, for making this possible, Freesound.org - for weapon sounds.",
+  "logoFile": "Guncraft.png",
+  "screenshots": [],
+  "dependencies": []
+}
+]

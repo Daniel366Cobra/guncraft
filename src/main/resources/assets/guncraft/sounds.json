@@ -1,0 +1,180 @@
+{
+    "musket.shot": {
+        "subtitle": "sound.musket.shot",
+        "category": "player",
+        "sounds": [
+            {
+                "name": "guncraft:gunshot1",
+                "stream": false
+            },
+            {
+                "name": "guncraft:gunshot2",
+                "stream": false
+            },
+            {
+                "name": "guncraft:gunshot3",
+                "stream": false
+            },
+            {
+                "name": "guncraft:gunshot4",
+                "stream": false
+            }
+        ]
+    },
+    "musket.flintlockcock": {
+        "subtitle": "sound.musket.flintlockcock",
+        "category": "player",
+        "sounds": [
+            {
+                "name": "guncraft:flintlockcock",
+                "stream": false
+            }
+        ]
+    },
+    "musket.flintlockmisfire": {
+        "subtitle": "sound.musket.flintlockmisfire",
+        "category": "player",
+        "sounds": [
+            {
+                "name": "guncraft:flintlockmisfire",
+                "stream": false
+            }
+        ]
+    },
+    "bullet.hit": {
+        "subtitle": "sound.bullet.hit",
+        "category": "player",
+        "sounds": [
+            {
+                "name": "guncraft:bullethit",
+                "stream": false
+            }
+        ]
+    },
+    "leveraction.shot_reload": {
+        "subtitle": "sound.leveraction.shot_reload",
+        "category": "player",
+        "sounds": [
+            {
+                "name": "guncraft:gunshotreload1",
+                "stream": false
+            },
+            {
+                "name": "guncraft:gunshotreload2",
+                "stream": false
+            },
+            {
+                "name": "guncraft:gunshotreload3",
+                "stream": false
+            },
+            {
+                "name": "guncraft:gunshotreload4",
+                "stream": false
+            }
+        ]
+    },
+    "leveraction.load": {
+        "subtitle": "sound.leveraction.load",
+        "category": "player",
+        "sounds": [
+            {
+                "name": "guncraft:gunloadcartridge",
+                "stream": false
+            }
+        ]
+    },
+    "leveraction.dryfire": {
+        "subtitle": "sound.leveraction.dryfire",
+        "category": "player",
+        "sounds": [
+            {
+                "name": "guncraft:gundryfire",
+                "stream": false
+            }
+        ]
+    },
+    "pumpaction.shot_reload": {
+        "subtitle": "sound.pumpaction.shot_reload",
+        "category": "player",
+        "sounds": [
+            {
+                "name": "guncraft:gunshotreload1",
+                "stream": false
+            },
+            {
+                "name": "guncraft:gunshotreload2",
+                "stream": false
+            },
+            {
+                "name": "guncraft:gunshotreload3",
+                "stream": false
+            },
+            {
+                "name": "guncraft:gunshotreload4",
+                "stream": false
+            }
+        ]
+    },
+    "pumpaction.load": {
+        "subtitle": "sound.pumpaction.load",
+        "category": "player",
+        "sounds": [
+            {
+                "name": "guncraft:gunloadcartridge",
+                "stream": false
+            }
+        ]
+    },
+    "pumpaction.dryfire": {
+        "subtitle": "sound.pumpaction.dryfire",
+        "category": "player",
+        "sounds": [
+            {
+                "name": "guncraft:gundryfire",
+                "stream": false
+            }
+        ]
+    },
+    "grenade.fuse": {
+        "subtitle": "sound.grenade.fuse",
+        "category": "player",
+        "sounds": [
+            {
+                "name": "guncraft:grenadepop",
+                "stream": false
+            }
+        ]
+    },
+    "grenade.toss": {
+        "subtitle": "sound.grenade.toss",
+        "category": "player",
+        "sounds": [
+            {
+                "name": "guncraft:grenadetoss1",
+                "stream": false
+            },
+            {
+                "name": "guncraft:grenadetoss2",
+                "stream": false
+            },
+            {
+                "name": "guncraft:grenadetoss3",
+                "stream": false
+            },
+            {
+                "name": "guncraft:grenadetoss4",
+                "stream": false
+            }
+        ]
+    },
+	"sentry.fire": {
+        "subtitle": "sound.sentry.fire",
+        "category": "neutral",
+        "sounds": [
+            {
+                "name": "guncraft:sentryfire",
+                "stream": false
+            }
+        ]
+    }
+}

@@ -1,0 +1,29 @@
+{
+	"parent": "minecraft:recipes/root",
+	"rewards": {
+		"recipes": [
+			"guncraft:itemmusketball"
+		]
+	},
+	"criteria": {
+		"has_unlocked_musket": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipe": "guncraft:itemmusket"
+			}
+
+		},		
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipe": "guncraft:itemmusketball"
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_unlocked_musket",			
+			"has_the_recipe"
+		]
+	]
+}

@@ -1,0 +1,62 @@
+//Items
+item.musket.name=Flintlock Musket
+item.musketball.name=Musket Ball
+item.leveractionrifle.name=Lever Action Rifle
+item.leveractioncartridge.name=Lever Action Rifle Cartridge (FMJ bullet)
+item.leveractioncartridgeincendiary.name=Lever Action Rifle Cartridge (Incendiary)
+item.pumpactionshotgun.name=Pump Action Shotgun
+item.shotgunshell.name=Shotgun Shell (Buckshot)
+item.shotgunshellincendiary.name=Shotgun Shell (Incendiary)
+item.grenade.name=Grenade
+item.sentrybox.name=Sentry Construction Kit
+item.nvgoggles.name=Night Vision Goggles
+//Entities
+entity.genericbullet.name=Bullet
+entity.throwngrenade.name=Grenade
+entity.sentrygun.name=Sentry Gun
+//Tooltips and nametags
+musket.ammo.type=Ammo: %sMusket Balls%s
+leveractionrifle.ammo.type=Ammo: %sLever Action Rifle Cartridges%s
+pumpactionshotgun.ammo.type=Ammo: %sShotgun Shells%s
+weapon.mag.contents=Ammo:
+ammo.fmj=FMJ
+ammo.inc=INC
+ammo.buck=BUC
+turretowner.name=Turret of 
+//Interface
+itemGroup.guncraft=Guncraft
+//Advancements
+advancements.guncraft.root.title=Guncraft
+advancements.guncraft.root.description=Better than bows
+advancements.guncraft.get_gunpowder.title=Not just for fireworks...
+advancements.guncraft.get_gunpowder.description=Obtain some gunpowder
+advancements.guncraft.get_blaze_powder.title=Rain? No problem
+advancements.guncraft.get_blaze_powder.description=Find some Blaze Powder for percussion caps
+advancements.guncraft.get_musket.title=Brown Bess
+advancements.guncraft.get_musket.description=Make a Flintlock Musket
+advancements.guncraft.get_leveractionrifle.title=Red Ryder
+advancements.guncraft.get_leveractionrifle.description=Make a Lever Action Rifle
+advancements.guncraft.get_pumpactionshotgun.title=Trench Broom
+advancements.guncraft.get_pumpactionshotgun.description=Make a Pump Action Shotgun
+//Subtitles
+sound.musket.shot=Musket shoots
+sound.musket.flintlockcock=Flintlock cocked
+sound.musket.flintlockmisfire=Flintlock misfires
+sound.bullet.hit=Bullet hits
+sound.leveraction.shot_reload=Lever action rifle shoots & recocks
+sound.leveraction.load=Lever action rifle loaded
+sound.leveraction.dryfire=Lever action rifle dry fires
+sound.pumpaction.shot_reload=Pump action shotgun shoots & recocks
+sound.pumpaction.load=Pump action shotgun loaded
+sound.pumpaction.dryfire=Pump action shotgun dry fires
+sound.submachinegun.fire=Submachine gun fires
+sound.grenade.toss=Grenade thrown
+sound.sentry.fire=Sentry gun fires
+//Damage sources
+death.attack.bullet=%1$s was sniped by %2$s.
+death.attack.bullet.item=%1$s was sniped by %2$s using %3$s.
+death.attack.gunexplosion=%1$s's old musket got its revenge.
+death.attack.grenadehit=%1$s was conked on the head by %2$s's grenade.
+death.attack.grenadehit.item=%1$s was conked on the head by %2$s's grenade "%3$s".
+death.attack.shrapnel=%1$s was pierced by shrapnel from %2$s's grenade.
+death.attack.shrapnel.item=%1$s was pierced by shrapnel from %2$s's grenade "%3$s".

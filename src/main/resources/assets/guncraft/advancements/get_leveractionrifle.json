@@ -1,0 +1,28 @@
+{
+	"display": {
+		"icon": {
+			"item": "guncraft:itemleveractionrifle"
+		},
+		"title": {
+			"translate": "advancements.guncraft.get_leveractionrifle.title"
+		},
+		"description": {
+			"translate": "advancements.guncraft.get_leveractionrifle.description"
+		},
+		"frame": "task"
+	},
+	"parent": "guncraft:get_musket",
+	"rewards": {
+		"experience": 50
+	},
+	"criteria": {
+		"has_leveractionrifle": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [{
+					"item": "guncraft:itemleveractionrifle"
+				}]
+			}
+		}
+	}
+}

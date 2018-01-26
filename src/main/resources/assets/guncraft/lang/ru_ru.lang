@@ -1,0 +1,62 @@
+//Items
+item.musket.name=Кремневый мушкет
+item.musketball.name=Мушкетный патрон
+item.leveractionrifle.name=Карабин рычажного действия
+item.leveractioncartridge.name=Патрон к карабину (Пуля ЦМО)
+item.leveractioncartridgeincendiary.name=Зажигательный патрон к карабину
+item.pumpactionshotgun.name=Помповый дробовик
+item.shotgunshell.name=Картечный патрон к дробовику
+item.shotgunshellincendiary.name=Зажигательный патрон к дробовику
+item.grenade.name=Граната
+item.sentrybox.name=Набор для постройки турели
+item.nvgoggles.name=Очки ночного видения
+//Entities
+entity.genericbullet.name=Пуля
+entity.throwngrenade.name=Граната
+entity.sentrygun.name=Турель
+//Tooltips and nametags
+musket.ammo.type=Боеприпасы: %sмушкетные патроны%s
+leveractionrifle.ammo.type=Боеприпасы: %sпатроны к карабину%s
+pumpactionshotgun.ammo.type=Боеприпасы: %sПатроны к дробовику%s
+weapon.mag.contents=В магазине:
+ammo.fmj=ЦМО
+ammo.inc=ЗАЖ
+ammo.buck=КАР
+turretowner.name=Турель 
+//Interface
+itemGroup.guncraft=Guncraft
+//Advancements
+advancements.guncraft.root.title=Guncraft
+advancements.guncraft.root.description=Кому нужны луки?
+advancements.guncraft.get_gunpowder.title=Не только для фейерверков...
+advancements.guncraft.get_gunpowder.description=Раздобудьте немного пороха
+advancements.guncraft.get_blaze_powder.title=Дождь не страшен
+advancements.guncraft.get_blaze_powder.description=Найдите Огненный порошок для капсюлей
+advancements.guncraft.get_musket.title=Не намочи порох
+advancements.guncraft.get_musket.description=Сделайте Кремневый мушкет
+advancements.guncraft.get_leveractionrifle.title=Дикий Запад
+advancements.guncraft.get_leveractionrifle.description=Сделайте Карабин рычажного действия
+advancements.guncraft.get_pumpactionshotgun.title=Окопная метла
+advancements.guncraft.get_pumpactionshotgun.description=Сделайте Помповый дробовик
+//Subtitles
+sound.musket.shot=Выстрел мушкета
+sound.musket.flintlockcock=Кремневый замок взведен
+sound.musket.flintlockmisfire=Осечка кремневого замка
+sound.bullet.hit=Удар пули
+sound.leveraction.shot_reload=Выстрел и перезарядка карабина
+sound.leveraction.load=Зарядка магазина карабина 
+sound.leveraction.dryfire=Щелчок курка карабина
+sound.pumpaction.shot_reload=Выстрел и перезарядка дробовика
+sound.pumpaction.load=Зарядка магазина дробовика
+sound.pumpaction.dryfire=Щелчок курка дробовика
+sound.grenade.fuse=Хлопок и шипение запала гранаты
+sound.grenade.toss=Бросок гранаты
+sound.sentry.fire=Выстрел автоматической турели
+//Damage sources
+death.attack.bullet=%1$s не ушел от пули %2$s.
+death.attack.bullet.item=%1$s застрелен %2$s из %3$s.
+death.attack.gunexplosion=%1$s не следил за оружием.
+death.attack.grenadehit=%1$s получил по голове гранатой %2$s.
+death.attack.grenadehit.item=%1$s получил по голове гранатой "%3$s" от %2$s.
+death.attack.shrapnel=%1$s был убит осколком гранаты %2$s.
+death.attack.shrapnel.item=%1$s был убит осколком гранаты "%3$s" от %2$s.

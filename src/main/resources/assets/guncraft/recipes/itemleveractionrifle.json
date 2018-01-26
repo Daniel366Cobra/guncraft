@@ -1,0 +1,45 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GII",
+    "WWW"
+  ],
+  "key": {
+    "G": {
+      	"item": "minecraft:gold_ingot"    	
+    },
+    "I": {
+    	"item": "minecraft:iron_ingot"
+    },
+    "W": [
+      {
+		"item": "minecraft:planks",
+        "data": 0
+      },
+      {
+        "item": "minecraft:planks",
+        "data": 1
+      },
+      {
+        "item": "minecraft:planks",
+        "data": 2
+      },
+      {
+        "item": "minecraft:planks",
+        "data": 3
+      },
+      {
+        "item": "minecraft:planks",
+        "data": 4
+      },
+      {
+        "item": "minecraft:planks",
+        "data": 5
+      }
+    ]
+  },
+  "result": {
+    "item": "guncraft:itemleveractionrifle",
+    "data": 7
+  }
+}
