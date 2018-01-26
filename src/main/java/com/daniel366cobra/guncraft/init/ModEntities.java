@@ -25,9 +25,9 @@ public class ModEntities
 	@SubscribeEvent
 	public static void registerEntities(RegistryEvent.Register<EntityEntry> event)
 	{
-		ModEntities.register(event.getRegistry());	
+		ModEntities.register(event.getRegistry());
 	}
-	
+
 	public static void register(final IForgeRegistry<EntityEntry> registry)
 	{
 		registry.register(EntityEntryBuilder.create()
@@ -48,7 +48,7 @@ public class ModEntities
 				.entity(EntitySentryGun.class)
 				.id(new ResourceLocation(Reference.MODID, "sentrygun"), 3)
 				.name("sentrygun")
-				.tracker(128, 3, false)				
+				.tracker(128, 3, false)
 				.build()
 				);
 		System.out.println("Registered entities");

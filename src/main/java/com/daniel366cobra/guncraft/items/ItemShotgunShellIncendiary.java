@@ -18,9 +18,9 @@ public class ItemShotgunShellIncendiary extends Item
 		setMaxStackSize(64);
 		setCreativeTab(GunCraft.guncrafttab);
 	}
-	
+
 	@SideOnly(Side.CLIENT)
-    public void initModel() {
-        ModelLoader.setCustomModelResourceLocation(this, 0, new ModelResourceLocation(getRegistryName(), "inventory"));
-    }
+	public void initModel() {
+		ModelLoader.setCustomModelResourceLocation(this, 0, new ModelResourceLocation(getRegistryName(), "inventory"));
+	}
 }

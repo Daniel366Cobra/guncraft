@@ -17,7 +17,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class EventHandlerFOV
 {
 	private static EntityPlayer player;
-	private static Minecraft mc;	
+	private static Minecraft mc;
 	//private static ItemStack heldItem;
 
 	@SubscribeEvent
@@ -26,7 +26,7 @@ public class EventHandlerFOV
 		if (event.getType() == ElementType.CROSSHAIRS)
 		{
 			mc = Minecraft.getMinecraft();
-			
+
 			if (player != null && player.getActiveHand() != null && mc.gameSettings.thirdPersonView == 0)
 			{
 				if (player.getHeldItem(player.getActiveHand()).getItem() == ModItems.leveractionrifle && player.isSneaking())
@@ -39,7 +39,7 @@ public class EventHandlerFOV
 		if (event.getType() == ElementType.HOTBAR)
 		{
 			mc = Minecraft.getMinecraft();
-			
+
 			if (player != null && player.getActiveHand() != null && mc.gameSettings.thirdPersonView == 0)
 			{
 				if (player.getHeldItem(player.getActiveHand()).getItem() == ModItems.leveractionrifle && player.isSneaking())
@@ -56,7 +56,7 @@ public class EventHandlerFOV
 	{
 		mc = Minecraft.getMinecraft();
 		player = event.getEntity();
-		
+
 		//heldItem = player.getActiveItemStack();
 		if (player != null && player.getActiveHand() != null && mc.gameSettings.thirdPersonView == 0)
 		{
@@ -64,7 +64,7 @@ public class EventHandlerFOV
 			{
 				event.setNewfov(0.15F);
 			}
-		}		
+		}
 	}
 
 }

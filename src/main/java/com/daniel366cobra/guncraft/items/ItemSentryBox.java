@@ -25,32 +25,33 @@ public class ItemSentryBox extends Item {
 		setMaxStackSize(1);
 		setCreativeTab(GunCraft.guncrafttab);
 	}
-	
-	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
-    {
-        ItemStack stack = player.getHeldItem(hand);
 
-        if (world.isRemote)
-        {
-            return EnumActionResult.SUCCESS;
-        }
-        else if (!player.canPlayerEdit(pos.offset(facing), facing, stack))
-        {
-            return EnumActionResult.FAIL;
-        }
-        else
-        {                     
-            BlockPos sentryPos = pos.offset(facing);
-            EntitySentryGun sentry = new EntitySentryGun(world, player);
-            sentry.setLocationAndAngles((double)sentryPos.getX() + 0.5D, (double)sentryPos.getY(), (double)sentryPos.getZ() + 0.5D, player.rotationYaw, 0.0F);
-            world.spawnEntity(sentry);
-            stack.shrink(1);
-            return EnumActionResult.SUCCESS;
-        }
-    }
-	
+	@Override
+	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+	{
+		ItemStack stack = player.getHeldItem(hand);
+
+		if (world.isRemote)
+		{
+			return EnumActionResult.SUCCESS;
+		}
+		else if (!player.canPlayerEdit(pos.offset(facing), facing, stack))
+		{
+			return EnumActionResult.FAIL;
+		}
+		else
+		{
+			BlockPos sentryPos = pos.offset(facing);
+			EntitySentryGun sentry = new EntitySentryGun(world, player);
+			sentry.setLocationAndAngles(sentryPos.getX() + 0.5D, sentryPos.getY(), sentryPos.getZ() + 0.5D, player.rotationYaw, 0.0F);
+			world.spawnEntity(sentry);
+			stack.shrink(1);
+			return EnumActionResult.SUCCESS;
+		}
+	}
+
 	@SideOnly(Side.CLIENT)
-    public void initModel() {
-        ModelLoader.setCustomModelResourceLocation(this, 0, new ModelResourceLocation(getRegistryName(), "inventory"));
-    }
+	public void initModel() {
+		ModelLoader.setCustomModelResourceLocation(this, 0, new ModelResourceLocation(getRegistryName(), "inventory"));
+	}
 }

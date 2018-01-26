@@ -1,6 +1,7 @@
 package com.daniel366cobra.guncraft.items;
 
 import java.util.List;
+
 import javax.annotation.Nullable;
 
 import com.daniel366cobra.guncraft.GunCraft;
@@ -32,7 +33,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemMusket extends Item {
-	
+
 
 	public ItemMusket(){
 		setUnlocalizedName("musket");
@@ -40,26 +41,30 @@ public class ItemMusket extends Item {
 		setMaxStackSize(1);
 		setCreativeTab(GunCraft.guncrafttab);
 		setMaxDamage(384);
-		
+
 	}
 
+	@Override
 	public EnumAction getItemUseAction(ItemStack stack)
 	{
 		return EnumAction.BOW;
 
 	}
 
+	@Override
 	public boolean getIsRepairable(ItemStack tool, ItemStack material)
 	{
 		return false;
 	}
 
 	//Maximum item usage time.
+	@Override
 	public int getMaxItemUseDuration(ItemStack stack)
 	{
 		return 72000;
 	}
-	
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flagin)
 	{
@@ -71,7 +76,7 @@ public class ItemMusket extends Item {
 	//Returns the first available ItemStack of ammunition.
 	private ItemStack findAmmo(EntityPlayer player)
 	{
-		if (this.isAmmo(player.getHeldItem(EnumHand.OFF_HAND))) 
+		if (this.isAmmo(player.getHeldItem(EnumHand.OFF_HAND)))
 		{
 			return player.getHeldItem(EnumHand.OFF_HAND);
 		}
@@ -101,6 +106,7 @@ public class ItemMusket extends Item {
 	}
 
 	//Sets musket in use (aiming).
+	@Override
 	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
 	{
 		ItemStack itemstack = player.getHeldItem(hand);
@@ -112,6 +118,7 @@ public class ItemMusket extends Item {
 		return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemstack);
 	}
 
+	@Override
 	public void onPlayerStoppedUsing(ItemStack stack, World world, EntityLivingBase entityLiving, int timeLeft)
 	{
 		if (entityLiving instanceof EntityPlayer)
@@ -125,7 +132,7 @@ public class ItemMusket extends Item {
 			int timeAiming = this.getMaxItemUseDuration(stack) - timeLeft;
 			if (timeAiming < 0) return;
 
-			
+
 			//if player has ammo or is in creative mode or has infinity enchantment
 			if ((!ammostack.isEmpty() || creative || infinity) && timeAiming >= 20 && !entityplayer.isWet())
 			{
@@ -136,10 +143,10 @@ public class ItemMusket extends Item {
 					EntityGenericBullet bullet = new EntityGenericBullet(world, entityplayer, 18.0D, 1.0D, false);
 					bullet.shoot(entityplayer, entityplayer.rotationPitch, entityplayer.rotationYaw, 6.5F, 0.0F);
 					world.spawnEntity(bullet);
-					
-					//Shot sound 
+
+					//Shot sound
 					world.playSound(null, entityplayer.posX, entityplayer.posY, entityplayer.posZ, ModSounds.musketshot, SoundCategory.PLAYERS, 2.0F, 1.0F);
-					
+
 					//recoil
 					entityplayer.setLocationAndAngles(entityplayer.posX, entityplayer.posY, entityplayer.posZ, entityplayer.rotationYaw, entityplayer.rotationPitch - (itemRand.nextFloat() * 10.0F + 10.0F));
 
@@ -157,13 +164,13 @@ public class ItemMusket extends Item {
 							gunexplosiondamage = new EntityDamageSource("gunexplosion",entityplayer);
 							world.newExplosion(entityplayer, entityplayer.posX, entityplayer.posY + entityplayer.eyeHeight - 0.1D, entityplayer.posZ, 1.5F, false, true);
 							entityplayer.attackEntityFrom(gunexplosiondamage, 18.0F);
-														
+
 						}
 					}
 
 
 				}
-				
+
 				//Consume 1 unit of ammo if not in creative mode or enchanted for infinity
 				if (!creative && !infinity)
 				{
@@ -186,10 +193,10 @@ public class ItemMusket extends Item {
 
 		}
 	}
-	
+
 	@SideOnly(Side.CLIENT)
-    public void initModel() {
-        ModelLoader.setCustomModelResourceLocation(this, 0, new ModelResourceLocation(getRegistryName(), "inventory"));
-    }
-	
+	public void initModel() {
+		ModelLoader.setCustomModelResourceLocation(this, 0, new ModelResourceLocation(getRegistryName(), "inventory"));
+	}
+
 }

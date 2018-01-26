@@ -44,6 +44,7 @@ public class EntityGenericBullet extends Entity implements IProjectile
 	@SuppressWarnings("unchecked")
 	private static final Predicate<Entity> BULLET_TARGETS = Predicates.and(EntitySelectors.NOT_SPECTATING, EntitySelectors.IS_ALIVE, new Predicate<Entity>()
 	{
+		@Override
 		public boolean apply(@Nullable Entity entity)
 		{
 			return entity.canBeCollidedWith();
@@ -55,26 +56,26 @@ public class EntityGenericBullet extends Entity implements IProjectile
 	protected boolean inGround;
 	public Entity shootingEntity;
 	private int ticksInGround;
-	private int ticksInAir;	
-	private double damage;	
+	private int ticksInAir;
+	private double damage;
 	private double knockbackStrength;
 
 	public EntityGenericBullet(World world)
 	{
 		super(world);
 		this.setDamage(2.0F);
-		this.setSize(0.25F, 0.25F);		
+		this.setSize(0.25F, 0.25F);
 	}
 	//Allows to set coordinates
 	public EntityGenericBullet(World world, double x, double y, double z)
 	{
 		this(world);
-		this.setPosition(x, y, z);		
-	}	
+		this.setPosition(x, y, z);
+	}
 
 	public EntityGenericBullet(World world, EntityLivingBase shooter, double damage, double knockbackStrength, boolean incendiary)
-	{		
-		this(world, shooter.posX, shooter.posY + (double)shooter.getEyeHeight() - 0.1D, shooter.posZ);
+	{
+		this(world, shooter.posX, shooter.posY + shooter.getEyeHeight() - 0.1D, shooter.posZ);
 		this.shootingEntity = shooter;
 		this.setDamage(damage);
 		this.setKnockbackStrength(knockbackStrength);
@@ -84,6 +85,7 @@ public class EntityGenericBullet extends Entity implements IProjectile
 	/**
 	 * Checks if the entity is in range to render.
 	 */
+	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isInRangeToRenderDist(double distance)
 	{
@@ -104,7 +106,7 @@ public class EntityGenericBullet extends Entity implements IProjectile
 		float f = -MathHelper.sin(yaw * 0.017453292F) * MathHelper.cos(pitch * 0.017453292F);
 		float f1 = -MathHelper.sin(pitch * 0.017453292F);
 		float f2 = MathHelper.cos(yaw * 0.017453292F) * MathHelper.cos(pitch * 0.017453292F);
-		this.shoot((double)f, (double)f1, (double)f2, velocity, inaccuracy);
+		this.shoot(f, f1, f2, velocity, inaccuracy);
 		this.motionX += shooter.motionX;
 		this.motionZ += shooter.motionZ;
 
@@ -117,24 +119,25 @@ public class EntityGenericBullet extends Entity implements IProjectile
 	/**
 	 * Similar to setArrowHeading, it's point the throwable entity to a x, y, z direction.
 	 */
+	@Override
 	public void shoot(double x, double y, double z, float velocity, float inaccuracy)
 	{
 		float f = MathHelper.sqrt(x * x + y * y + z * z);
-		x = x / (double)f;
-		y = y / (double)f;
-		z = z / (double)f;
-		x = x + this.rand.nextGaussian() * 0.0075D * (double)inaccuracy;
-		y = y + this.rand.nextGaussian() * 0.0075D * (double)inaccuracy;
-		z = z + this.rand.nextGaussian() * 0.0075D * (double)inaccuracy;
-		x = x * (double)velocity;
-		y = y * (double)velocity;
-		z = z * (double)velocity;
+		x = x / f;
+		y = y / f;
+		z = z / f;
+		x = x + this.rand.nextGaussian() * 0.0075D * inaccuracy;
+		y = y + this.rand.nextGaussian() * 0.0075D * inaccuracy;
+		z = z + this.rand.nextGaussian() * 0.0075D * inaccuracy;
+		x = x * velocity;
+		y = y * velocity;
+		z = z * velocity;
 		this.motionX = x;
 		this.motionY = y;
 		this.motionZ = z;
 		float f1 = MathHelper.sqrt(x * x + z * z);
 		this.rotationYaw = (float)(MathHelper.atan2(x, z) * (180D / Math.PI));
-		this.rotationPitch = (float)(MathHelper.atan2(y, (double)f1) * (180D / Math.PI));
+		this.rotationPitch = (float)(MathHelper.atan2(y, f1) * (180D / Math.PI));
 		this.prevRotationYaw = this.rotationYaw;
 		this.prevRotationPitch = this.rotationPitch;
 		this.ticksInGround = 0;
@@ -143,6 +146,7 @@ public class EntityGenericBullet extends Entity implements IProjectile
 	/**
 	 * Set the position and rotation values directly without any clamping.
 	 */
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void setPositionAndRotationDirect(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport)
 	{
@@ -153,6 +157,7 @@ public class EntityGenericBullet extends Entity implements IProjectile
 	/**
 	 * Updates the entity motion clientside, called by packets from the server
 	 */
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void setVelocity(double x, double y, double z)
 	{
@@ -163,7 +168,7 @@ public class EntityGenericBullet extends Entity implements IProjectile
 		if (this.prevRotationPitch == 0.0F && this.prevRotationYaw == 0.0F)
 		{
 			float f = MathHelper.sqrt(x * x + z * z);
-			this.rotationPitch = (float)(MathHelper.atan2(y, (double)f) * (180D / Math.PI));
+			this.rotationPitch = (float)(MathHelper.atan2(y, f) * (180D / Math.PI));
 			this.rotationYaw = (float)(MathHelper.atan2(x, z) * (180D / Math.PI));
 			this.prevRotationPitch = this.rotationPitch;
 			this.prevRotationYaw = this.rotationYaw;
@@ -172,7 +177,8 @@ public class EntityGenericBullet extends Entity implements IProjectile
 		}
 	}
 
-	//Called to update the entity's position/logic.	
+	//Called to update the entity's position/logic.
+	@Override
 	public void onUpdate()
 	{
 		this.lastTickPosX = this.posX;
@@ -189,13 +195,13 @@ public class EntityGenericBullet extends Entity implements IProjectile
 		{
 			float f = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
 			this.rotationYaw = (float)(MathHelper.atan2(this.motionX, this.motionZ) * (180D / Math.PI));
-			this.rotationPitch = (float)(MathHelper.atan2(this.motionY, (double)f) * (180D / Math.PI));
+			this.rotationPitch = (float)(MathHelper.atan2(this.motionY, f) * (180D / Math.PI));
 			this.prevRotationYaw = this.rotationYaw;
 			this.prevRotationPitch = this.rotationPitch;
 		}
 
 		if (this.inGround) //If in ground - decay quickly
-		{			
+		{
 
 			this.motionX = 0.0D;
 			this.motionY = 0.0D;
@@ -213,7 +219,7 @@ public class EntityGenericBullet extends Entity implements IProjectile
 		}
 		else //In air
 		{
-			++this.ticksInAir;			
+			++this.ticksInAir;
 			Vec3d curPos = new Vec3d(this.posX, this.posY, this.posZ);
 			Vec3d nextPos = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
 			RayTraceResult traceOnPath = this.world.rayTraceBlocks(curPos, nextPos, false, true, false);
@@ -248,8 +254,8 @@ public class EntityGenericBullet extends Entity implements IProjectile
 			EnumParticleTypes currenttrail = this.ticksExisted < 2? EnumParticleTypes.EXPLOSION_NORMAL : this.isIncendiary()? EnumParticleTypes.FLAME : EnumParticleTypes.CRIT;
 
 			for (int k = 0; k < 8; ++k)
-			{				
-				this.world.spawnParticle(currenttrail, this.posX + this.motionX * (double)k / 8.0D, this.posY + this.motionY * (double)k / 8.0D, this.posZ + this.motionZ * (double)k / 8.0D, -this.motionX * 0.05D, -this.motionY * 0.05D, -this.motionZ * 0.05D);
+			{
+				this.world.spawnParticle(currenttrail, this.posX + this.motionX * k / 8.0D, this.posY + this.motionY * k / 8.0D, this.posZ + this.motionZ * k / 8.0D, -this.motionX * 0.05D, -this.motionY * 0.05D, -this.motionZ * 0.05D);
 			}
 
 			this.posX += this.motionX;
@@ -260,9 +266,9 @@ public class EntityGenericBullet extends Entity implements IProjectile
 			float XYVelMagn = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
 			this.rotationYaw = (float)(MathHelper.atan2(this.motionX, this.motionZ) * (180D / Math.PI));
 
-			for (this.rotationPitch = 
-					(float)(MathHelper.atan2(this.motionY, (double)XYVelMagn) 
-							* (180D / Math.PI)); 
+			for (this.rotationPitch =
+					(float)(MathHelper.atan2(this.motionY, XYVelMagn)
+							* (180D / Math.PI));
 					this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F)
 			{
 				;
@@ -301,20 +307,20 @@ public class EntityGenericBullet extends Entity implements IProjectile
 			}
 
 			//Slowing down due to drag
-			this.motionX *= (double)drag;
-			this.motionY *= (double)drag;
-			this.motionZ *= (double)drag;
+			this.motionX *= drag;
+			this.motionY *= drag;
+			this.motionZ *= drag;
 
 			if (!this.hasNoGravity())
 			{
 				this.motionY -= freefallAccel;
 			}
 
-			this.setPosition(this.posX, this.posY, this.posZ);    		
+			this.setPosition(this.posX, this.posY, this.posZ);
 		}
 	}
 
-	//Gets the amount of gravity to apply to the thrown entity with each tick.    
+	//Gets the amount of gravity to apply to the thrown entity with each tick.
 	protected float getGravityVelocity()
 	{
 		return 0.01F;
@@ -325,7 +331,7 @@ public class EntityGenericBullet extends Entity implements IProjectile
 	{
 		World curWorld = this.world;
 		if (result.typeOfHit == Type.BLOCK) //Calculate interaction, bounce and deceleration
-		{	
+		{
 			float vel = (float)Math.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
 
 			BlockPos hitBlockPos = result.getBlockPos();
@@ -356,7 +362,7 @@ public class EntityGenericBullet extends Entity implements IProjectile
 					{
 						curWorld.setBlockState(hitBlockPos.offset(result.sideHit), Blocks.FIRE.getDefaultState(), 3);
 					}
-				}				
+				}
 
 				for (int k = 0; k <= 10; k++)
 				{
@@ -366,7 +372,7 @@ public class EntityGenericBullet extends Entity implements IProjectile
 		}
 		else if (result.typeOfHit == Type.ENTITY)
 		{
-			Entity entityHit = result.entityHit;			
+			Entity entityHit = result.entityHit;
 
 			DamageSource bulletdamage;
 
@@ -389,7 +395,7 @@ public class EntityGenericBullet extends Entity implements IProjectile
 			//Headshot and close-range hit detection
 			if ((this.posY >= (entityHit.posY + entityHit.height * 0.7F)) || (this.ticksExisted <= 3))
 			{
-				totalDamage *= 10.0D;				
+				totalDamage *= 10.0D;
 			}
 
 			if (entityHit.attackEntityFrom(bulletdamage, (float)totalDamage))
@@ -408,7 +414,7 @@ public class EntityGenericBullet extends Entity implements IProjectile
 
 						if (horizVel > 0.0F)
 						{
-							entityLivingHit.addVelocity(this.motionX * this.knockbackStrength * 0.3D / (double)horizVel, 0.1D, this.motionZ * this.knockbackStrength * 0.6D / (double)horizVel);
+							entityLivingHit.addVelocity(this.motionX * this.knockbackStrength * 0.3D / horizVel, 0.1D, this.motionZ * this.knockbackStrength * 0.6D / horizVel);
 						}
 					}
 
@@ -418,7 +424,7 @@ public class EntityGenericBullet extends Entity implements IProjectile
 					{
 						((EntityPlayerMP)this.shootingEntity).connection.sendPacket(new SPacketChangeGameState(6, 0.0F));
 					}
-				}				
+				}
 
 				this.setDead();
 			}
@@ -439,7 +445,7 @@ public class EntityGenericBullet extends Entity implements IProjectile
 
 		for (int i = 0; i < list.size(); ++i)
 		{
-			Entity entity1 = (Entity)list.get(i);
+			Entity entity1 = list.get(i);
 
 			if (entity1 != this.shootingEntity || this.ticksInAir >= 5)
 			{
@@ -467,9 +473,10 @@ public class EntityGenericBullet extends Entity implements IProjectile
 	/**
 	 * (abstract) Protected helper method to write subclass entity data to NBT.
 	 */
+	@Override
 	public void writeEntityToNBT(NBTTagCompound compound)
-	{		
-		compound.setShort("life", (short)this.ticksInGround);		
+	{
+		compound.setShort("life", (short)this.ticksInGround);
 		compound.setByte("inGround", (byte)(this.inGround ? 1 : 0));
 		compound.setDouble("damage", this.damage);
 		compound.setBoolean("incendiary", this.isIncendiary());
@@ -478,9 +485,10 @@ public class EntityGenericBullet extends Entity implements IProjectile
 	/**
 	 * (abstract) Protected helper method to read subclass entity data from NBT.
 	 */
+	@Override
 	public void readEntityFromNBT(NBTTagCompound compound)
-	{		
-		this.ticksInGround = compound.getShort("life");		
+	{
+		this.ticksInGround = compound.getShort("life");
 		this.inGround = compound.getByte("inGround") == 1;
 
 		if (compound.hasKey("damage", 99))
@@ -495,6 +503,7 @@ public class EntityGenericBullet extends Entity implements IProjectile
 	 * returns if this entity triggers Block.onEntityWalking on the blocks they walk on. used for spiders and wolves to
 	 * prevent them from trampling crops
 	 */
+	@Override
 	protected boolean canTriggerWalking()
 	{
 		return false;
@@ -521,11 +530,13 @@ public class EntityGenericBullet extends Entity implements IProjectile
 	/**
 	 * Returns true if it's possible to attack this entity with an item.
 	 */
+	@Override
 	public boolean canBeAttackedWithItem()
 	{
 		return false;
 	}
 
+	@Override
 	public float getEyeHeight()
 	{
 		return 0.0F;
@@ -542,6 +553,6 @@ public class EntityGenericBullet extends Entity implements IProjectile
 	}
 	public void setIncendiary(boolean incendiary)
 	{
-		this.dataManager.set(INCENDIARY, incendiary);		
+		this.dataManager.set(INCENDIARY, incendiary);
 	}
 }

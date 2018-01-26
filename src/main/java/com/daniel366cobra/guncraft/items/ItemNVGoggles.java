@@ -17,16 +17,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemNVGoggles extends ItemArmor
 {
-
 	public ItemNVGoggles(ArmorMaterial materialIn, int renderIndexIn, EntityEquipmentSlot equipmentSlotIn)
 	{
 		super(materialIn, renderIndexIn, equipmentSlotIn);
 		setNoRepair();
 		setUnlocalizedName("nvgoggles");
 		setRegistryName(Reference.MODID, "itemnvgoggles");
-		setCreativeTab(GunCraft.guncrafttab);	
+		setCreativeTab(GunCraft.guncrafttab);
 	}
-	
+
 	@Override
 	public void onArmorTick(World world, EntityPlayer player, ItemStack itemStack)
 	{
@@ -35,12 +34,12 @@ public class ItemNVGoggles extends ItemArmor
 			player.removePotionEffect(MobEffects.BLINDNESS);
 		}
 		player.addPotionEffect(new PotionEffect(MobEffects.NIGHT_VISION, 250, 0, true, false));
-		
+
 	}
-	
+
 	@SideOnly(Side.CLIENT)
-    public void initModel()	{
-        ModelLoader.setCustomModelResourceLocation(this, 0, new ModelResourceLocation(getRegistryName(), "inventory"));
-    }
+	public void initModel()	{
+		ModelLoader.setCustomModelResourceLocation(this, 0, new ModelResourceLocation(getRegistryName(), "inventory"));
+	}
 
 }

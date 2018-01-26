@@ -42,12 +42,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityThrownGrenade extends Entity implements IProjectile
 {
-
 	private int xTile;
 	private int yTile;
 	private int zTile;
 	private Block inTile;
-	protected boolean inGround;    
+	protected boolean inGround;
 	protected EntityLivingBase thrower;
 	private String throwerName;
 	private int ticksInAir;
@@ -60,8 +59,8 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 		this.xTile = -1;
 		this.yTile = -1;
 		this.zTile = -1;
-		this.setSize(0.3F, 0.3F);		
-	}	
+		this.setSize(0.3F, 0.3F);
+	}
 
 	public EntityThrownGrenade(World worldIn, double x, double y, double z, int fuseTicks)
 	{
@@ -72,10 +71,11 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 
 	public EntityThrownGrenade(World worldIn, EntityLivingBase throwerIn, int fuseTicks)
 	{
-		this(worldIn, throwerIn.posX, throwerIn.posY + (double)throwerIn.getEyeHeight() - 0.1D, throwerIn.posZ, fuseTicks);
+		this(worldIn, throwerIn.posX, throwerIn.posY + throwerIn.getEyeHeight() - 0.1D, throwerIn.posZ, fuseTicks);
 		this.thrower = throwerIn;
 	}
 
+	@Override
 	protected void entityInit()
 	{
 	}
@@ -83,6 +83,7 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 	/**
 	 * Checks if the entity is in range to render.
 	 */
+	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isInRangeToRenderDist(double distance)
 	{
@@ -105,7 +106,7 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 		float f = -MathHelper.sin(rotationYawIn * 0.017453292F) * MathHelper.cos(rotationPitchIn * 0.017453292F);
 		float f1 = -MathHelper.sin((rotationPitchIn + pitchOffset) * 0.017453292F);
 		float f2 = MathHelper.cos(rotationYawIn * 0.017453292F) * MathHelper.cos(rotationPitchIn * 0.017453292F);
-		this.shoot((double)f, (double)f1, (double)f2, velocity, inaccuracy);
+		this.shoot(f, f1, f2, velocity, inaccuracy);
 		this.motionX += entityThrower.motionX;
 		this.motionZ += entityThrower.motionZ;
 
@@ -118,24 +119,25 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 	/**
 	 * Similar to setArrowHeading, it's point the throwable entity to a x, y, z direction.
 	 */
+	@Override
 	public void shoot(double x, double y, double z, float velocity, float inaccuracy)
 	{
 		float f = MathHelper.sqrt(x * x + y * y + z * z);
-		x = x / (double)f;
-		y = y / (double)f;
-		z = z / (double)f;
-		x = x + this.rand.nextGaussian() * 0.007499999832361937D * (double)inaccuracy;
-		y = y + this.rand.nextGaussian() * 0.007499999832361937D * (double)inaccuracy;
-		z = z + this.rand.nextGaussian() * 0.007499999832361937D * (double)inaccuracy;
-		x = x * (double)velocity;
-		y = y * (double)velocity;
-		z = z * (double)velocity;
+		x = x / f;
+		y = y / f;
+		z = z / f;
+		x = x + this.rand.nextGaussian() * 0.007499999832361937D * inaccuracy;
+		y = y + this.rand.nextGaussian() * 0.007499999832361937D * inaccuracy;
+		z = z + this.rand.nextGaussian() * 0.007499999832361937D * inaccuracy;
+		x = x * velocity;
+		y = y * velocity;
+		z = z * velocity;
 		this.motionX = x;
 		this.motionY = y;
 		this.motionZ = z;
 		float f1 = MathHelper.sqrt(x * x + z * z);
 		this.rotationYaw = (float)(MathHelper.atan2(x, z) * (180D / Math.PI));
-		this.rotationPitch = (float)(MathHelper.atan2(y, (double)f1) * (180D / Math.PI));
+		this.rotationPitch = (float)(MathHelper.atan2(y, f1) * (180D / Math.PI));
 		this.prevRotationYaw = this.rotationYaw;
 		this.prevRotationPitch = this.rotationPitch;
 		this.ticksInAir = 0;
@@ -144,6 +146,7 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 	/**
 	 * Updates the entity motion clientside, called by packets from the server
 	 */
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void setVelocity(double x, double y, double z)
 	{
@@ -155,13 +158,14 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 		{
 			float f = MathHelper.sqrt(x * x + z * z);
 			this.rotationYaw = (float)(MathHelper.atan2(x, z) * (180D / Math.PI));
-			this.rotationPitch = (float)(MathHelper.atan2(y, (double)f) * (180D / Math.PI));
+			this.rotationPitch = (float)(MathHelper.atan2(y, f) * (180D / Math.PI));
 			this.prevRotationYaw = this.rotationYaw;
 			this.prevRotationPitch = this.rotationPitch;
 		}
 	}
 
 	//Called to update the entity's position/logic.
+	@Override
 	public void onUpdate()
 	{
 
@@ -174,12 +178,12 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 		--this.fuseLength;
 		if (this.fuseLength <= 0)
 		{
-			World curWorld = this.world;			
+			World curWorld = this.world;
 			Vec3d curPos = new Vec3d(this.posX + this.width, this.posY  + 1.0F, this.posZ);
 
 			//Lists of entities in blast radius, those hit by shrapnel and blocks to be smashed
 			List<Entity> entitiesInRadius = curWorld.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox().grow(7.5D));
-			List<Entity> entitiesHit = Lists.<Entity>newArrayList();			
+			List<Entity> entitiesHit = Lists.<Entity>newArrayList();
 			Set<BlockPos> lowerDoorParts = new HashSet<BlockPos>();
 
 			List<Vec3d> rayPoints = EntityThrownGrenade.distribSphere();
@@ -193,13 +197,13 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 					RayTraceResult hitRes = this.world.rayTraceBlocks(curPos, castPosAbs, false, true, true);
 					if (hitRes != null && hitRes.typeOfHit != Type.MISS)
 					{
-						if (hitRes.typeOfHit == Type.BLOCK)//Redundant because rayTraceBlocks gives only blocks	
-						{				
+						if (hitRes.typeOfHit == Type.BLOCK)//Redundant because rayTraceBlocks gives only blocks
+						{
 							BlockPos hitBlockPos = hitRes.getBlockPos();
 							IBlockState hitBlockState = curWorld.getBlockState(hitBlockPos);
 							boolean isBlockVulnerable = (
-									hitBlockState.getMaterial() == Material.GLASS 
-									|| hitBlockState.getMaterial() == Material.GOURD 
+									hitBlockState.getMaterial() == Material.GLASS
+									|| hitBlockState.getMaterial() == Material.GOURD
 									|| hitBlockState.getMaterial() == Material.PLANTS
 									|| hitBlockState.getMaterial() == Material.VINE
 									);
@@ -214,14 +218,14 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 								{
 
 									BlockPos lowerPartPos = hitBlockState.getValue(BlockDoor.HALF) == BlockDoor.EnumDoorHalf.LOWER ? hitBlockPos : hitBlockPos.down();
-									lowerDoorParts.add(lowerPartPos);	
+									lowerDoorParts.add(lowerPartPos);
 								}
 								castPosAbs = new Vec3d(hitRes.hitVec.x, hitRes.hitVec.y, hitRes.hitVec.z);
 								break;
 							}
 						}
 					}
-					else 
+					else
 					{
 						break;
 					}
@@ -231,21 +235,21 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 				{
 					Entity curEntity = entitiesInRadius.get(i);
 					AxisAlignedBB curEntityAABB = curEntity.getEntityBoundingBox().grow(0.3D);
-					RayTraceResult entityHitRes = curEntityAABB.calculateIntercept(curPos, castPosAbs);					
+					RayTraceResult entityHitRes = curEntityAABB.calculateIntercept(curPos, castPosAbs);
 					if (entityHitRes != null)
 					{//Add to the list of hit entities
-						entitiesHit.add(curEntity);						
+						entitiesHit.add(curEntity);
 					}
 
-				}				
+				}
 
 
-			}				
+			}
 
 			if (!curWorld.isRemote)
 			{
 				//Make a small explosion
-				this.world.newExplosion(this, this.posX, this.posY, this.posZ, 1.0F, false, true);					
+				this.world.newExplosion(this, this.posX, this.posY, this.posZ, 1.0F, false, true);
 				//Open or break doors
 				Iterator<BlockPos> hitDoorPosIter = lowerDoorParts.iterator();
 				while(hitDoorPosIter.hasNext()) {
@@ -259,7 +263,7 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 
 						switch (facing)
 						{
-						case EAST:							
+						case EAST:
 							open = (this.posX < doorPos.getX());
 							break;
 						case WEST:
@@ -274,7 +278,7 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 						default:
 							open = false;
 							break;
-						}					
+						}
 
 						if (open)
 						{
@@ -284,7 +288,7 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 						{
 							curWorld.destroyBlock(doorPos, true);
 							curWorld.playSound(null, this.posX, this.posY, this.posZ,SoundEvents.ENTITY_ZOMBIE_BREAK_DOOR_WOOD, SoundCategory.PLAYERS, 1.0F, 1.0F);
-						}						
+						}
 					}
 				}
 				//Hurt entities
@@ -305,11 +309,11 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 		{
 
 			if (this.inGround) //If lying on a block
-			{				
+			{
 				if (this.world.getBlockState(new BlockPos(this.xTile, this.yTile, this.zTile)).getBlock() != this.inTile)
-				{					
+				{
 					//If suddenly not on the same block - reset the counters
-					this.inGround = false;				
+					this.inGround = false;
 					this.ticksInAir = 0;
 				}
 
@@ -356,7 +360,7 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 				{//else just pass the trace result to the impact calculation routine
 					this.onImpact(traceOnPath);
 				}
-			}        
+			}
 
 			//Leave a smoke trail
 			this.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, this.posX, this.posY + this.height * 0.5F, this.posZ, 0.0D, 0.0D, 0.0D, new int[0]);
@@ -370,9 +374,9 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 			float XYVelMagn = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
 			this.rotationYaw = (float)(MathHelper.atan2(this.motionX, this.motionZ) * (180D / Math.PI));
 
-			for (this.rotationPitch = 
-					(float)(MathHelper.atan2(this.motionY, (double)XYVelMagn) 
-							* (180D / Math.PI)); 
+			for (this.rotationPitch =
+					(float)(MathHelper.atan2(this.motionY, XYVelMagn)
+							* (180D / Math.PI));
 					this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F)
 			{
 				;
@@ -413,36 +417,36 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 					drag = 0.8F;
 				}
 				//Slowing down due to drag
-				this.motionX *= (double)drag;
-				this.motionY *= (double)drag;
-				this.motionZ *= (double)drag;
+				this.motionX *= drag;
+				this.motionY *= drag;
+				this.motionZ *= drag;
 				//And accelerating downwards
 				if (!this.hasNoGravity())
 				{
-					this.motionY -= (double)freefallAccel;
+					this.motionY -= freefallAccel;
 				}
 			}
 			else
-			{				
-				this.motionY = 0.0D;				
+			{
+				this.motionY = 0.0D;
 			}
 			//And finally set the new position
 			this.setPosition(this.posX, this.posY, this.posZ);
 		}
 	}
 
-	//Gets the amount of gravity to apply to the thrown entity with each tick.    
+	//Gets the amount of gravity to apply to the thrown entity with each tick.
 	protected float getGravityVelocity()
 	{
 		return 0.03F;
 	}
 
-	//Called when this EntityThrowable hits a block or entity.    
+	//Called when this EntityThrowable hits a block or entity.
 	protected void onImpact(RayTraceResult result)
 	{
 		World curWorld = this.world;
 		if (result.typeOfHit == Type.BLOCK) //Calculate interaction, bounce and deceleration
-		{	
+		{
 			float vel = (float)Math.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
 
 			BlockPos hitBlockPos = result.getBlockPos();
@@ -459,7 +463,7 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 				}
 			}
 			else if (hitBlockState.getMaterial() != Material.VINE)
-			{	
+			{
 				//Which side of block did the entity hit?
 				boolean hitAlongX = (result.sideHit == EnumFacing.WEST || result.sideHit == EnumFacing.EAST);
 				boolean hitAlongZ = (result.sideHit == EnumFacing.NORTH || result.sideHit == EnumFacing.SOUTH);
@@ -553,7 +557,7 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 			Entity curEntity = listHit.get(i);
 			//Ignore owner if freshly thrown.
 			if (curEntity != this.thrower || this.ticksInAir >= 2)
-			{	
+			{
 				AxisAlignedBB axisalignedbb = curEntity.getEntityBoundingBox().grow(0.3D);
 				RayTraceResult entityHitTrace = axisalignedbb.calculateIntercept(start, end);
 
@@ -572,6 +576,7 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 		return entityHit;
 	}
 
+	@Override
 	@Nullable
 	public void move(MoverType type, double x, double y, double z)
 	{
@@ -590,6 +595,7 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 	}
 
 	//(abstract) Protected helper method to write subclass entity data to NBT.
+	@Override
 	public void writeEntityToNBT(NBTTagCompound compound)
 	{
 		compound.setInteger("xTile", this.xTile);
@@ -609,6 +615,7 @@ public class EntityThrownGrenade extends Entity implements IProjectile
 	}
 
 	//(abstract) Protected helper method to read subclass entity data from NBT.
+	@Override
 	public void readEntityFromNBT(NBTTagCompound compound)
 	{
 		this.xTile = compound.getInteger("xTile");

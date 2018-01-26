@@ -45,27 +45,28 @@ public class EntitySentryGun extends EntityGolem implements IRangedAttackMob
 	public EntitySentryGun(World worldIn)
 	{
 		super(worldIn);
-		this.setSize(0.7F, 1.0F);		
+		this.setSize(0.7F, 1.0F);
 	}
 
 	public EntitySentryGun(World worldIn, EntityPlayer placer)
 	{
-		this(worldIn);		
-		this.setOwner(placer);		
-		this.setCustomNameTag(I18n.format("turretowner.name") + placer.getName());		
+		this(worldIn);
+		this.setOwner(placer);
+		this.setCustomNameTag(I18n.format("turretowner.name") + placer.getName());
 	}
-	
+
 	public static void registerFixesSentry(DataFixer fixer)
 	{
 		EntityLiving.registerFixesMob(fixer, EntitySentryGun.class);
 	}
 
+	@Override
 	public boolean processInteract(EntityPlayer player, EnumHand hand)
 	{
 		ItemStack stack = player.getHeldItem(hand);
 
 		if (stack.isEmpty() && this.isOwner(player))
-		{			
+		{
 			if (!this.world.isRemote)
 			{
 				this.dropItem(ModItems.sentrybox, 1);
@@ -78,10 +79,11 @@ public class EntitySentryGun extends EntityGolem implements IRangedAttackMob
 			return false;
 		}
 	}
-	
-	
-	
+
+
+
 	//Retaliate against other players and their sentries
+	@Override
 	public boolean attackEntityFrom(DamageSource source, float amount)
 	{
 		if (this.isEntityInvulnerable(source))
@@ -91,15 +93,15 @@ public class EntitySentryGun extends EntityGolem implements IRangedAttackMob
 		else
 		{
 			Entity attacker = source.getTrueSource();
-			Entity attackTool = source.getImmediateSource();	
-			
+			Entity attackTool = source.getImmediateSource();
+
 			boolean attackedByOwner = ((attacker instanceof EntityPlayer) && ((EntityPlayer)attacker == this.getOwner()));
 			boolean attackedMelee = (attacker == attackTool);
 			boolean attackExplosive = source.isExplosion();
 			boolean friendlyFire = (attacker instanceof EntitySentryGun) && (((EntitySentryGun) attacker).getOwner() == this.getOwner());
-			
+
 			if (friendlyFire) return false;
-			
+
 			if (attackedByOwner) //When hit by owner, do no damage
 			{
 				if (attackedMelee && !attackExplosive)
@@ -107,36 +109,37 @@ public class EntitySentryGun extends EntityGolem implements IRangedAttackMob
 					return false;
 				}
 				else //When attacked by owner indirectly, get damage but not retaliate
-				{				
+				{
 					this.lastDamage = amount;
-                    this.hurtResistantTime = this.maxHurtResistantTime;
-                    this.damageEntity(source, amount);
-                    this.maxHurtTime = 10;
-                    this.hurtTime = this.maxHurtTime;
-                    return true;
+					this.hurtResistantTime = this.maxHurtResistantTime;
+					this.damageEntity(source, amount);
+					this.maxHurtTime = 10;
+					this.hurtTime = this.maxHurtTime;
+					return true;
 				}
 			}
 			else //If attacked by anything other than owner, retaliate
-			{			
-				return super.attackEntityFrom(source, amount);	
+			{
+				return super.attackEntityFrom(source, amount);
 			}
 		}
 	}
-	
+
 	//Generate a small cloud of particles
 	@SideOnly(Side.CLIENT)
-    private void spawnParticles(EnumParticleTypes particleType)
-    {
-        for (int i = 0; i < 5; ++i)
-        {
-            double d0 = this.rand.nextGaussian() * 0.02D;
-            double d1 = this.rand.nextGaussian() * 0.02D;
-            double d2 = this.rand.nextGaussian() * 0.02D;
-            this.world.spawnParticle(particleType, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 1.0D + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, d0, d1, d2);
-        }
-    }
-	
+	private void spawnParticles(EnumParticleTypes particleType)
+	{
+		for (int i = 0; i < 5; ++i)
+		{
+			double d0 = this.rand.nextGaussian() * 0.02D;
+			double d1 = this.rand.nextGaussian() * 0.02D;
+			double d2 = this.rand.nextGaussian() * 0.02D;
+			this.world.spawnParticle(particleType, this.posX + this.rand.nextFloat() * this.width * 2.0F - this.width, this.posY + 1.0D + this.rand.nextFloat() * this.height, this.posZ + this.rand.nextFloat() * this.width * 2.0F - this.width, d0, d1, d2);
+		}
+	}
+
 	//When killed, drop a sentry kit
+	@Override
 	public void onDeath(DamageSource cause)
 	{
 		super.onDeath(cause);
@@ -146,13 +149,15 @@ public class EntitySentryGun extends EntityGolem implements IRangedAttackMob
 		}
 	}
 
+	@Override
 	protected void initEntityAI()
-	{		
+	{
 		this.tasks.addTask(0, new EntityAIAttackRanged(this, 0.0D, 5, 5, 40.0F));
 		this.tasks.addTask(1, new EntityAILookIdle(this));
-				
+
 		this.targetTasks.addTask(1, new EntityAINearestAttackableTarget<EntityLiving>(this, EntityLiving.class, 2, true, false, new Predicate<EntityLiving>()
 		{
+			@Override
 			public boolean apply(@Nullable EntityLiving entityTarget)
 			{
 				return entityTarget != null && IMob.VISIBLE_MOB_SELECTOR.apply(entityTarget) && !(entityTarget instanceof EntityEnderman);
@@ -161,27 +166,31 @@ public class EntitySentryGun extends EntityGolem implements IRangedAttackMob
 		this.targetTasks.addTask(2, new EntityAIHurtByTarget(this, false, new Class[0]));
 	}
 
+	@Override
 	protected void applyEntityAttributes()
 	{
 		super.applyEntityAttributes();
 		this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(10.0D);
 		this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.0D);
 	}
-	
+
+	@Override
 	public void attackEntityWithRangedAttack(EntityLivingBase target, float distanceFactor)
-	{		   
+	{
 		EntityGenericBullet entitybullet = new EntityGenericBullet(this.world, this, 5.0D, 0.1D, false);
 		entitybullet.shoot(target.posX - this.posX, target.posY - this.posY + target.getEyeHeight() * 0.1F , target.posZ - this.posZ, 5.0F, 1.5F);
 		this.playSound(ModSounds.sentryfire, 6.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
 		this.world.spawnEntity(entitybullet);
 	}
 
+	@Override
 	public float getEyeHeight()
 	{
 		return 0.875F;
 	}
 
 
+	@Override
 	protected SoundEvent getDeathSound()
 	{
 		return SoundEvents.ENTITY_IRONGOLEM_HURT;
@@ -189,7 +198,7 @@ public class EntitySentryGun extends EntityGolem implements IRangedAttackMob
 
 	public void setOwnerId(@Nullable UUID owner_UUID)
 	{
-		this.dataManager.set(OWNER_UNIQUE_ID, Optional.fromNullable(owner_UUID));        
+		this.dataManager.set(OWNER_UNIQUE_ID, Optional.fromNullable(owner_UUID));
 	}
 
 	public void setOwner(EntityPlayer player)
@@ -200,7 +209,7 @@ public class EntitySentryGun extends EntityGolem implements IRangedAttackMob
 	@Nullable
 	public UUID getOwnerId()
 	{
-		return (UUID)((Optional<UUID>)this.dataManager.get(OWNER_UNIQUE_ID)).orNull();
+		return this.dataManager.get(OWNER_UNIQUE_ID).orNull();
 	}
 
 	@Nullable
@@ -254,7 +263,7 @@ public class EntitySentryGun extends EntityGolem implements IRangedAttackMob
 
 	@Override
 	public void setSwingingArms(boolean swingingArms)
-	{		
+	{
 	}
 
 

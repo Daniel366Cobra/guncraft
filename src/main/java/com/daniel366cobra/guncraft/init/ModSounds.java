@@ -11,7 +11,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 
 @Mod.EventBusSubscriber(modid = Reference.MODID)
 public class ModSounds
-{	
+{
 	public static final SoundEvent musketshot = new SoundEvent(new ResourceLocation(Reference.MODID, "musket.shot")).setRegistryName("musket.shot");
 	public static final SoundEvent flintlockcock = new SoundEvent(new ResourceLocation(Reference.MODID, "musket.flintlockcock")).setRegistryName("musket.flintlockcock");
 	public static final SoundEvent flintlockmisfire = new SoundEvent(new ResourceLocation(Reference.MODID, "musket.flintlockmisfire")).setRegistryName("musket.flintlockmisfire");
@@ -35,10 +35,10 @@ public class ModSounds
 	public static void registerSounds(RegistryEvent.Register<SoundEvent> event)
 	{
 		ModSounds.register(event.getRegistry());
-	} 
+	}
 
 	public static void register(final IForgeRegistry<SoundEvent> registry)
-	{				
+	{
 		final SoundEvent[] soundEvents = {
 				musketshot,
 				flintlockcock,
@@ -48,7 +48,7 @@ public class ModSounds
 				leveractiondryfire,
 				pumpactionload,
 				pumpactionshot_reload,
-				pumpactiondryfire,				
+				pumpactiondryfire,
 				bullethit,
 				grenadefuse,
 				grenadetoss,

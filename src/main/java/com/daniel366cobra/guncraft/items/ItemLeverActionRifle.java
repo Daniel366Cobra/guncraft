@@ -44,42 +44,47 @@ public class ItemLeverActionRifle extends Item {
 		setCreativeTab(GunCraft.guncrafttab);
 		setMaxDamage(7);
 
-	}	
+	}
 
+	@Override
 	public EnumAction getItemUseAction(ItemStack stack)
 	{
 		return EnumAction.BOW;
 
 	}
 
+	@Override
 	public boolean getIsRepairable(ItemStack tool, ItemStack material)
 	{
 		return false;
 	}
 
 	//Maximum item usage time.
+	@Override
 	public int getMaxItemUseDuration(ItemStack stack)
 	{
 		return 72000;
 	}
 
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void renderHelmetOverlay(ItemStack stack, EntityPlayer player, net.minecraft.client.gui.ScaledResolution resolution, float partialTicks)
 	{
-		
+
 	}
-	
-	
+
+
 
 
 	//Shows ammunition type in tooltip
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flagin)
 	{
 		super.addInformation(stack, world, tooltip, flagin);
 		tooltip.add(I18n.format("leveractionrifle.ammo.type", TextFormatting.BOLD, TextFormatting.RESET));
 		if (stack.hasTagCompound())
-		{			
+		{
 			if (stack.getTagCompound().hasKey("magazine"))
 			{
 				String displayAmmoTypes = "";
@@ -96,7 +101,7 @@ public class ItemLeverActionRifle extends Item {
 	//Returns the first available ItemStack of ammunition.
 	private ItemStack findAmmo(EntityPlayer player)
 	{
-		if (this.isAmmo(player.getHeldItem(EnumHand.OFF_HAND))) 
+		if (this.isAmmo(player.getHeldItem(EnumHand.OFF_HAND)))
 		{
 			return player.getHeldItem(EnumHand.OFF_HAND);
 		}
@@ -126,30 +131,34 @@ public class ItemLeverActionRifle extends Item {
 	}
 
 	//Give the rifle an NBT magazine.
+	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean held)
 	{
 		if (stack.getTagCompound()==null && held)
 		{
-			stack.setTagCompound(new NBTTagCompound());			
+			stack.setTagCompound(new NBTTagCompound());
 			stack.getTagCompound().setTag("magazine", new NBTTagList());
 		}
 	}
 
 	//Sets rifle in use (aiming).
+	@Override
 	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
-	{	
+	{
 		ItemStack stack = player.getHeldItem(hand);
 		player.setActiveHand(hand);
 		return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, stack);
 
 	}
-	
+
+	@Override
 	public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged)
-    {
+	{
 		return false;
-		
+
 	}
 
+	@Override
 	public void onPlayerStoppedUsing(ItemStack stack, World world, EntityLivingBase entityLiving, int timeLeft)
 	{
 		if (entityLiving instanceof EntityPlayer)
@@ -167,9 +176,9 @@ public class ItemLeverActionRifle extends Item {
 
 			//Long right click -> finished aiming
 			if (timeAiming > 10)
-			{				
+			{
 				if (magazine.tagCount() > 0)
-				{	
+				{
 
 					if (!world.isRemote)
 					{
@@ -177,10 +186,10 @@ public class ItemLeverActionRifle extends Item {
 
 						EntityGenericBullet bullet = new EntityGenericBullet(world, entityplayer, 20.0D, 0.5D, magazine.getStringTagAt(magazine.tagCount() - 1).equals("ammo.inc"));
 						bullet.shoot(entityplayer, entityplayer.rotationPitch, entityplayer.rotationYaw, 6.5F, 0.0F);
-						world.spawnEntity(bullet);						
+						world.spawnEntity(bullet);
 						//Deplete magazine from the back - fire the last loaded
 						magazine.removeTag(magazine.tagCount() - 1);
-						//Expend 1 unit of ammo, update the damage value 
+						//Expend 1 unit of ammo, update the damage value
 						stack.setItemDamage(7 - magazine.tagCount());
 
 						//Shot sound and recoil
@@ -207,7 +216,7 @@ public class ItemLeverActionRifle extends Item {
 					if (!world.isRemote)
 					{
 						magazine.appendTag(new NBTTagString("ammo.fmj"));
-						//Load 1 unit of ammo and update the damage value						
+						//Load 1 unit of ammo and update the damage value
 						stack.setItemDamage(7 - magazine.tagCount());
 
 						//Reload sound
@@ -219,7 +228,7 @@ public class ItemLeverActionRifle extends Item {
 				{
 
 					if (!world.isRemote)
-					{						
+					{
 						//Replenish magazine from the back
 						if (ammostack.getItem() == ModItems.leveractioncartridge)
 						{
@@ -229,7 +238,7 @@ public class ItemLeverActionRifle extends Item {
 						{
 							magazine.appendTag(new NBTTagString("ammo.inc"));
 						}
-						//Load 1 unit of ammo and update the damage value						
+						//Load 1 unit of ammo and update the damage value
 						stack.setItemDamage(7 - magazine.tagCount());
 						//Reload sound
 						world.playSound(null, entityplayer.posX, entityplayer.posY, entityplayer.posZ, ModSounds.leveractionload, SoundCategory.PLAYERS, 1.0F, 1.0F);

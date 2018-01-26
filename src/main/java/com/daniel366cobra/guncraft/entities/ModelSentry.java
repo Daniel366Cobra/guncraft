@@ -65,22 +65,23 @@ public class ModelSentry extends ModelBase
 		this.base.addChild(this.leg2);
 		this.base.addChild(this.leg3);
 		this.base.addChild(this.leg4);
-		
+
 		this.head.addChild(this.barrel);
 		this.head.addChild(this.ammodrum);
 	}
 
+	@Override
 	public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn)
 	{
 		this.head.rotateAngleY = netHeadYaw * 0.017453292F;
-		this.head.rotateAngleX = headPitch * 0.017453292F;		
+		this.head.rotateAngleX = headPitch * 0.017453292F;
 	}
-	
+
 	@Override
 	public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale)
-	{ 
+	{
 		this.base.render(scale);
 		this.head.render(scale);
-	}    
-	
+	}
+
 }

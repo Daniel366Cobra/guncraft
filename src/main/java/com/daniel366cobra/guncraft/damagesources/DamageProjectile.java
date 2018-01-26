@@ -18,7 +18,8 @@ public class DamageProjectile extends EntityDamageSource
 		super(damageTypeIn, source);
 		this.trueSource = indirectEntityIn;
 	}
-	
+
+	@Override
 	@Nullable
 	public Entity getImmediateSource()
 	{
@@ -29,6 +30,7 @@ public class DamageProjectile extends EntityDamageSource
 	 * Retrieves the true cause of the damage, e.g. the player who fired an arrow, the shulker who fired the bullet,
 	 * etc.
 	 */
+	@Override
 	@Nullable
 	public Entity getTrueSource()
 	{
@@ -38,6 +40,7 @@ public class DamageProjectile extends EntityDamageSource
 	/**
 	 * Gets the death message that is displayed when the player dies
 	 */
+	@Override
 	public ITextComponent getDeathMessage(EntityLivingBase entityLivingBaseIn)
 	{
 		ITextComponent itextcomponent = this.trueSource == null ? this.damageSourceEntity.getDisplayName() : this.trueSource.getDisplayName();

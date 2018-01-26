@@ -35,8 +35,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemPumpActionShotgun extends Item
 {
-
-
 	public ItemPumpActionShotgun(){
 		setUnlocalizedName("pumpactionshotgun");
 		setRegistryName(Reference.MODID, "itempumpactionshotgun");
@@ -46,31 +44,35 @@ public class ItemPumpActionShotgun extends Item
 	}
 
 
+	@Override
 	public EnumAction getItemUseAction(ItemStack stack)
 	{
 		return EnumAction.BOW;
 
 	}
 
+	@Override
 	public boolean getIsRepairable(ItemStack tool, ItemStack material)
 	{
 		return false;
 	}
 
 	//Maximum item usage time.
+	@Override
 	public int getMaxItemUseDuration(ItemStack stack)
 	{
 		return 72000;
 	}
 
 	//Shows ammunition type in tooltip
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flagin)
 	{
 		super.addInformation(stack, world, tooltip, flagin);
 		tooltip.add(I18n.format("pumpactionshotgun.ammo.type", TextFormatting.BOLD, TextFormatting.RESET));
 		if (stack.hasTagCompound())
-		{			
+		{
 			if (stack.getTagCompound().hasKey("magazine"))
 			{
 				String displayAmmoTypes = "";
@@ -87,7 +89,7 @@ public class ItemPumpActionShotgun extends Item
 	//Returns the first available ItemStack of ammunition.
 	private ItemStack findAmmo(EntityPlayer player)
 	{
-		if (this.isAmmo(player.getHeldItem(EnumHand.OFF_HAND))) 
+		if (this.isAmmo(player.getHeldItem(EnumHand.OFF_HAND)))
 		{
 			return player.getHeldItem(EnumHand.OFF_HAND);
 		}
@@ -105,7 +107,7 @@ public class ItemPumpActionShotgun extends Item
 				{
 					return itemstack;
 				}
-			}			
+			}
 			return ItemStack.EMPTY;
 		}
 	}
@@ -114,26 +116,29 @@ public class ItemPumpActionShotgun extends Item
 	private boolean isAmmo(ItemStack stack) {
 		return (stack.getItem() == ModItems.shotgunshell || stack.getItem() == ModItems.shotgunshellincendiary);
 	}
-	
+
 	//Give the shotgun an NBT magazine.
-		public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean held)
-	    {
-			if (stack.getTagCompound()==null && held)
-			{
-				stack.setTagCompound(new NBTTagCompound());			
-				stack.getTagCompound().setTag("magazine", new NBTTagList());
-			}
-	    }
+	@Override
+	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean held)
+	{
+		if (stack.getTagCompound()==null && held)
+		{
+			stack.setTagCompound(new NBTTagCompound());
+			stack.getTagCompound().setTag("magazine", new NBTTagList());
+		}
+	}
 
 	//Sets shotgun in use (aiming).
+	@Override
 	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
 	{
-		ItemStack stack = player.getHeldItem(hand);		
+		ItemStack stack = player.getHeldItem(hand);
 		player.setActiveHand(hand);
 		return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, stack);
 
 	}
 
+	@Override
 	public void onPlayerStoppedUsing(ItemStack stack, World world, EntityLivingBase entityLiving, int timeLeft)
 	{
 		if (entityLiving instanceof EntityPlayer)
@@ -145,15 +150,15 @@ public class ItemPumpActionShotgun extends Item
 			int timeAiming = this.getMaxItemUseDuration(stack) - timeLeft;
 
 			if (timeAiming < 0) return;
-			
+
 			//Get magazine contents as a list of strings
 			NBTTagList magazine = stack.getTagCompound().getTagList("magazine", NBT.TAG_STRING);
 
 			//Long right click -> finished aiming
 			if (timeAiming > 10)
-			{				
+			{
 				if (magazine.tagCount() > 0)
-				{	
+				{
 
 					if (!world.isRemote)
 					{
@@ -166,11 +171,11 @@ public class ItemPumpActionShotgun extends Item
 						}
 						//Shot sound
 						world.playSound(null, entityplayer.posX, entityplayer.posY, entityplayer.posZ, ModSounds.pumpactionshot_reload, SoundCategory.PLAYERS, 1.0F, 1.0F);
-						
+
 						//Deplete magazine from the back - fire the last loaded
 						magazine.removeTag(magazine.tagCount() - 1);
-						//Expend 1 unit of ammo, update the damage value 
-						stack.setItemDamage(7 - magazine.tagCount());												
+						//Expend 1 unit of ammo, update the damage value
+						stack.setItemDamage(7 - magazine.tagCount());
 					}
 					//recoil
 					entityplayer.setLocationAndAngles(entityplayer.posX, entityplayer.posY, entityplayer.posZ, entityplayer.rotationYaw, entityplayer.rotationPitch - (itemRand.nextFloat() * 5.0F + 5.0F));
@@ -193,20 +198,20 @@ public class ItemPumpActionShotgun extends Item
 					if (!world.isRemote)
 					{
 						magazine.appendTag(new NBTTagString("ammo.buck"));
-						//Load 1 unit of ammo and update the damage value						
+						//Load 1 unit of ammo and update the damage value
 						stack.setItemDamage(7 - magazine.tagCount());
-						
+
 						//Reload sound
 						world.playSound(null, entityplayer.posX, entityplayer.posY, entityplayer.posZ, ModSounds.pumpactionload, SoundCategory.PLAYERS, 1.0F, 1.0F);
-						
+
 					}
-					
+
 				}
 				else if (!ammostack.isEmpty())
 				{
 
 					if (!world.isRemote)
-					{						
+					{
 						//Replenish magazine from the back
 						if (ammostack.getItem() == ModItems.shotgunshell)
 						{
@@ -216,11 +221,11 @@ public class ItemPumpActionShotgun extends Item
 						{
 							magazine.appendTag(new NBTTagString("ammo.inc"));
 						}
-						//Load 1 unit of ammo and update the damage value						
+						//Load 1 unit of ammo and update the damage value
 						stack.setItemDamage(7 - magazine.tagCount());
 						//Reload sound
 						world.playSound(null, entityplayer.posX, entityplayer.posY, entityplayer.posZ, ModSounds.pumpactionload, SoundCategory.PLAYERS, 1.0F, 1.0F);
-						
+
 					}
 					if (!creative)
 					{

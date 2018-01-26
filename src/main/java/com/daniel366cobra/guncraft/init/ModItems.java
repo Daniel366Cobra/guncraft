@@ -29,27 +29,27 @@ public class ModItems {
 
 	public static final ItemMusket musket = new ItemMusket();
 	public static final ItemMusketBall musketball = new ItemMusketBall();
-	
+
 	public static final ItemLeverActionRifle leveractionrifle = new ItemLeverActionRifle();
 	public static final ItemLeverActionCartridge leveractioncartridge = new ItemLeverActionCartridge();
 	public static final ItemLeverActionCartridgeIncendiary leveractioncartridgeincendiary = new ItemLeverActionCartridgeIncendiary();
-	
+
 	public static final ItemPumpActionShotgun pumpactionshotgun = new ItemPumpActionShotgun();
 	public static final ItemShotgunShell shotgunshell = new ItemShotgunShell();
 	public static final ItemShotgunShellIncendiary shotgunshellincendiary = new ItemShotgunShellIncendiary();
-	
+
 	public static final ItemGrenade grenade = new ItemGrenade();
-	
+
 	public static final ItemSentryBox sentrybox = new ItemSentryBox();
-	
+
 	public static final ItemNVGoggles nvgoggles = new ItemNVGoggles(ArmorMaterial.LEATHER, 0, EntityEquipmentSlot.HEAD);
-	
+
 	@SubscribeEvent
-    public static void registerItems(RegistryEvent.Register<Item> event)
-    {
-        register(event.getRegistry());       
-    }   
-	
+	public static void registerItems(RegistryEvent.Register<Item> event)
+	{
+		register(event.getRegistry());
+	}
+
 	public static void register(final IForgeRegistry<Item> registry)
 	{
 
@@ -61,22 +61,22 @@ public class ModItems {
 				leveractioncartridgeincendiary,
 				pumpactionshotgun,
 				shotgunshell,
-				shotgunshellincendiary,				
+				shotgunshellincendiary,
 				grenade,
-				sentrybox				
+				sentrybox
 		};
 		registry.registerAll(items);
 		registry.register(nvgoggles);
 	}
 
-	
+
 	@SubscribeEvent
 	@SideOnly(Side.CLIENT)
 	public static void registerModels(ModelRegistryEvent event) {
 
 		ModItems.initModels();
-	}	
-	
+	}
+
 	public static void initModels()
 	{
 		musket.initModel();
@@ -86,10 +86,10 @@ public class ModItems {
 		leveractioncartridgeincendiary.initModel();
 		pumpactionshotgun.initModel();
 		shotgunshell.initModel();
-		shotgunshellincendiary.initModel();		
+		shotgunshellincendiary.initModel();
 		grenade.initModel();
 		sentrybox.initModel();
 		nvgoggles.initModel();
-		
+
 	}
 }
