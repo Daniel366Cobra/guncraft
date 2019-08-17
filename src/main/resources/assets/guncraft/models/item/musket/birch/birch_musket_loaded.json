@@ -1,0 +1,6 @@
+{
+    "parent": "guncraft:item/musket/birch/birch_musket",
+    "textures": {
+        "layer0": "guncraft:item/musket/birch/birch_musket_loaded"
+    }
+}

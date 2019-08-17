@@ -3,11 +3,11 @@ package com.daniel366cobra.guncraft.damagesources;
 import javax.annotation.Nullable;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 
 public class DamageProjectile extends EntityDamageSource
 {
@@ -41,13 +41,13 @@ public class DamageProjectile extends EntityDamageSource
 	 * Gets the death message that is displayed when the player dies
 	 */
 	@Override
-	public ITextComponent getDeathMessage(EntityLivingBase entityLivingBaseIn)
+	public ITextComponent getDeathMessage(LivingEntity entityLivingBaseIn)
 	{
 		ITextComponent itextcomponent = this.trueSource == null ? this.damageSourceEntity.getDisplayName() : this.trueSource.getDisplayName();
-		ItemStack itemstack = this.trueSource instanceof EntityLivingBase ? ((EntityLivingBase)this.trueSource).getHeldItemMainhand() : ItemStack.EMPTY;
+		ItemStack itemstack = this.trueSource instanceof LivingEntity ? ((LivingEntity)this.trueSource).getHeldItemMainhand() : ItemStack.EMPTY;
 		String s = "death.attack." + this.damageType;
 		String s1 = s + ".item";
-		return !itemstack.isEmpty() && itemstack.hasDisplayName() ? new TextComponentTranslation(s1, new Object[] {entityLivingBaseIn.getDisplayName(), itextcomponent, itemstack.getTextComponent()}) : new TextComponentTranslation(s, new Object[] {entityLivingBaseIn.getDisplayName(), itextcomponent});
+		return !itemstack.isEmpty() && itemstack.hasDisplayName() ? new TranslationTextComponent(s1, new Object[] {entityLivingBaseIn.getDisplayName(), itextcomponent, itemstack.getTextComponent()}) : new TranslationTextComponent(s, new Object[] {entityLivingBaseIn.getDisplayName(), itextcomponent});
 	}
 
 }

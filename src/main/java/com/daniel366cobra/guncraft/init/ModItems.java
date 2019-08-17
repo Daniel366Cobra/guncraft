@@ -1,95 +1,42 @@
 package com.daniel366cobra.guncraft.init;
 
-import com.daniel366cobra.guncraft.Reference;
-import com.daniel366cobra.guncraft.items.ItemGrenade;
-import com.daniel366cobra.guncraft.items.ItemLeverActionCartridge;
-import com.daniel366cobra.guncraft.items.ItemLeverActionCartridgeIncendiary;
-import com.daniel366cobra.guncraft.items.ItemLeverActionRifle;
-import com.daniel366cobra.guncraft.items.ItemMusket;
-import com.daniel366cobra.guncraft.items.ItemMusketBall;
-import com.daniel366cobra.guncraft.items.ItemNVGoggles;
-import com.daniel366cobra.guncraft.items.ItemPumpActionShotgun;
-import com.daniel366cobra.guncraft.items.ItemSentryBox;
-import com.daniel366cobra.guncraft.items.ItemShotgunShell;
-import com.daniel366cobra.guncraft.items.ItemShotgunShellIncendiary;
-
-import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemArmor.ArmorMaterial;
-import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.registries.IForgeRegistry;
 
-@Mod.EventBusSubscriber(modid = Reference.MODID)
 public class ModItems {
-
-	public static final ItemMusket musket = new ItemMusket();
-	public static final ItemMusketBall musketball = new ItemMusketBall();
-
-	public static final ItemLeverActionRifle leveractionrifle = new ItemLeverActionRifle();
-	public static final ItemLeverActionCartridge leveractioncartridge = new ItemLeverActionCartridge();
-	public static final ItemLeverActionCartridgeIncendiary leveractioncartridgeincendiary = new ItemLeverActionCartridgeIncendiary();
-
-	public static final ItemPumpActionShotgun pumpactionshotgun = new ItemPumpActionShotgun();
-	public static final ItemShotgunShell shotgunshell = new ItemShotgunShell();
-	public static final ItemShotgunShellIncendiary shotgunshellincendiary = new ItemShotgunShellIncendiary();
-
-	public static final ItemGrenade grenade = new ItemGrenade();
-
-	public static final ItemSentryBox sentrybox = new ItemSentryBox();
-
-	public static final ItemNVGoggles nvgoggles = new ItemNVGoggles(ArmorMaterial.LEATHER, 0, EntityEquipmentSlot.HEAD);
-
-	@SubscribeEvent
-	public static void registerItems(RegistryEvent.Register<Item> event)
-	{
-		register(event.getRegistry());
-	}
-
-	public static void register(final IForgeRegistry<Item> registry)
-	{
-
-		final Item[] items = {
-				musket,
-				musketball,
-				leveractionrifle,
-				leveractioncartridge,
-				leveractioncartridgeincendiary,
-				pumpactionshotgun,
-				shotgunshell,
-				shotgunshellincendiary,
-				grenade,
-				sentrybox
-		};
-		registry.registerAll(items);
-		registry.register(nvgoggles);
-	}
+	
+	public static Item gun_barrel;
+	
+	public static Item oak_gun_stock;
+	public static Item birch_gun_stock;
+	public static Item spruce_gun_stock;
+	public static Item jungle_gun_stock;
+	public static Item acacia_gun_stock;
+	public static Item dark_oak_gun_stock;
+	
+	public static Item trigger_mechanism;
+	
+	public static Item musket_ball;
+	
+	public static Item lever_action_cartridge;
+	
+	public static Item shotgun_shell_buckshot;
+	public static Item shotgun_shell_incendiary;
+	public static Item shotgun_shell_slug;
+	
+	public static Item oak_musket;
+	public static Item birch_musket;
+	public static Item spruce_musket;
+	public static Item jungle_musket;
+	public static Item acacia_musket;
+	public static Item dark_oak_musket;
+	
+	public static Item oak_break_action_shotgun;
+	public static Item birch_break_action_shotgun;
+	public static Item spruce_break_action_shotgun;
+	public static Item jungle_break_action_shotgun;
+	public static Item acacia_break_action_shotgun;
+	public static Item dark_oak_break_action_shotgun;
+	
 
 
-	@SubscribeEvent
-	@SideOnly(Side.CLIENT)
-	public static void registerModels(ModelRegistryEvent event) {
-
-		ModItems.initModels();
-	}
-
-	public static void initModels()
-	{
-		musket.initModel();
-		musketball.initModel();
-		leveractionrifle.initModel();
-		leveractioncartridge.initModel();
-		leveractioncartridgeincendiary.initModel();
-		pumpactionshotgun.initModel();
-		shotgunshell.initModel();
-		shotgunshellincendiary.initModel();
-		grenade.initModel();
-		sentrybox.initModel();
-		nvgoggles.initModel();
-
-	}
 }

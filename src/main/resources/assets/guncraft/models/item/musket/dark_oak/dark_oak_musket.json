@@ -1,0 +1,62 @@
+{
+    "parent": "item/generated",
+    "textures": {
+        "layer0": "guncraft:item/musket/dark_oak/dark_oak_musket"
+    },     
+    "display": {
+        "thirdperson_righthand": {
+            "rotation": [ -40, 90, 0 ],
+            "translation": [ -2, 0, 0 ],
+            "scale": [ 1.0, 1.0, 1.0 ]
+        },
+        "thirdperson_lefthand": {
+           "rotation": [ -40, -90, 0 ],
+            "translation": [ -2, 0, 0 ],
+            "scale": [ 1.0, 1.0, 1.0 ]
+        },
+        "firstperson_righthand": {
+           "rotation": [ -40, 90, 0 ],
+            "translation": [ -2, 0, 0 ],
+            "scale": [ 1.0, 1.0, 1.0 ]
+        },
+        "firstperson_lefthand": {
+            "rotation": [ -40, -90, 0 ],
+            "translation": [ -2, 0, 0 ],
+            "scale": [ 1.0, 1.0, 1.0 ]
+        }, 
+        "gui": {
+            "rotation": [ 0, 0, 0 ],
+            "translation": [ 0, 0, 0 ],
+            "scale": [ 1.0, 1.0, 1.0 ]
+        }
+       },
+    "overrides": [
+        {
+            "predicate": {
+                "guncraft:loading": 1,
+                "guncraft:load_progress": 0.2              
+            },
+            "model": "guncraft:item/musket/dark_oak/dark_oak_musket_load_0"
+        },
+        {
+            "predicate": {
+                "guncraft:loading": 1,
+                "guncraft:load_progress": 0.5
+            },
+            "model": "guncraft:item/musket/dark_oak/dark_oak_musket_load_1"
+        },
+        {
+            "predicate": {
+            	"guncraft:loading": 1,
+                "guncraft:load_progress": 0.9
+            },
+            "model": "guncraft:item/musket/dark_oak/dark_oak_musket_load_2"
+        },
+        {
+            "predicate": {
+            	"guncraft:loaded": 1                
+            },
+            "model": "guncraft:item/musket/dark_oak/dark_oak_musket_loaded"
+        }
+    ]
+}

@@ -1,0 +1,28 @@
+{
+	"display": {
+		"icon": {
+			"item": "guncraft:musket"
+		},
+		"title": {
+			"translate": "advancements.guncraft.get_musket.title"
+		},
+		"description": {
+			"translate": "advancements.guncraft.get_musket.description"
+		},
+		"frame": "task"
+	},
+	"parent": "guncraft:root",
+	"rewards": {
+		"experience": 50
+	},
+	"criteria": {
+		"has_musket": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [{
+					"item": "guncraft:musket"
+				}]
+			}
+		}
+	}
+}

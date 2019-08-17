@@ -1,0 +1,19 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " SS",
+        "WW "
+    ],
+    "key": {
+        "S": {
+            "item": "minecraft:oak_slab"
+        },        
+        "W": {
+            "item": "minecraft:oak_planks"
+        }
+    },
+    "result": {
+        "item": "guncraft:stock/oak_gun_stock",
+        "count": 1
+    }
+}

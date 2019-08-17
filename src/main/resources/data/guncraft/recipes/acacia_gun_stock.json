@@ -1,0 +1,19 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " SS",
+        "WW "
+    ],
+    "key": {
+        "S": {
+            "item": "minecraft:acacia_slab"
+        },        
+        "W": {
+            "item": "minecraft:acacia_planks"
+        }
+    },
+    "result": {
+        "item": "guncraft:stock/acacia_gun_stock",
+        "count": 1
+    }
+}

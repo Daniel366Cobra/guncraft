@@ -1,0 +1,6 @@
+{
+    "parent": "guncraft:item/musket/spruce/spruce_musket",
+    "textures": {
+        "layer0": "guncraft:item/musket/spruce/spruce_musket_load_1"
+    }
+}

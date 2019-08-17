@@ -1,0 +1,6 @@
+{
+    "parent": "guncraft:item/musket/oak/oak_musket",
+    "textures": {
+        "layer0": "guncraft:item/musket/oak/oak_musket_load_1"
+    }
+}

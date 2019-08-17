@@ -1,0 +1,25 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "FB",
+        "ST"
+    ],
+    "key": {
+        "F": {
+            "item": "minecraft:flint_and_steel"
+        },
+        "B": {
+            "item": "guncraft:gun_barrel"
+        },
+        "S": {
+            "item": "guncraft:stock/jungle_gun_stock"
+        },
+        "T": {
+            "item": "guncraft:trigger_mechanism"
+        }
+    },
+    "result": {
+        "item": "guncraft:musket/jungle/jungle_musket",
+        "count": 1
+    }
+}

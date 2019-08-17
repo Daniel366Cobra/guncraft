@@ -21,12 +21,32 @@
             }
         ]
     },
-    "musket.flintlockcock": {
-        "subtitle": "sound.musket.flintlockcock",
+    "musket.flintlockcockstart": {
+        "subtitle": "sound.musket.flintlockcockstart",
         "category": "player",
         "sounds": [
             {
-                "name": "guncraft:flintlockcock",
+                "name": "guncraft:flintlockcockstart",
+                "stream": false
+            }
+        ]
+    },
+    "musket.flintlockcockmiddle": {
+        "subtitle": "sound.musket.flintlockcockmiddle",
+        "category": "player",
+        "sounds": [
+            {
+                "name": "guncraft:flintlockcockmiddle",
+                "stream": false
+            }
+        ]
+    },
+    "musket.flintlockcockfull": {
+        "subtitle": "sound.musket.flintlockcockfull",
+        "category": "player",
+        "sounds": [
+            {
+                "name": "guncraft:flintlockcockfull",
                 "stream": false
             }
         ]
@@ -41,12 +61,120 @@
             }
         ]
     },
+
+	"breakaction.open": {
+        "subtitle": "sound.breakaction.open",
+        "category": "player",
+        "sounds": [
+            {
+                "name": "guncraft:breakactionopen1",
+                "stream": false
+            },
+            {
+                "name": "guncraft:breakactionopen2",
+                "stream": false
+            },
+            {
+                "name": "guncraft:breakactionopen3",
+                "stream": false
+            },
+            {
+                "name": "guncraft:breakactionopen4",
+                "stream": false
+            }
+        ]
+    },
+
+"breakaction.shellload": {
+        "subtitle": "sound.breakaction.shellload",
+        "category": "player",
+        "sounds": [
+            {
+                "name": "guncraft:breakactionshellload1",
+                "stream": false
+            },
+            {
+                "name": "guncraft:breakactionshellload2",
+                "stream": false
+            },
+            {
+                "name": "guncraft:breakactionshellload3",
+                "stream": false
+            }
+        ]
+    },
+
+"breakaction.close": {
+        "subtitle": "sound.breakaction.close",
+        "category": "player",
+        "sounds": [
+            {
+                "name": "guncraft:breakactionclose1",
+                "stream": false
+            },
+            {
+                "name": "guncraft:breakactionclose2",
+                "stream": false
+            },
+            {
+                "name": "guncraft:breakactionclose3",
+                "stream": false
+            },
+            {
+                "name": "guncraft:breakactionclose4",
+                "stream": false
+            }
+        ]
+    },
+"breakaction.shot": {
+        "subtitle": "sound.breakaction.shot",
+        "category": "player",
+        "sounds": [
+            {
+                "name": "guncraft:gunshot1",
+                "stream": false
+            },
+            {
+                "name": "guncraft:gunshot2",
+                "stream": false
+            },
+            {
+                "name": "guncraft:gunshot3",
+                "stream": false
+            },
+            {
+                "name": "guncraft:gunshot4",
+                "stream": false
+            }
+        ]
+    },
+"breakaction.dryfire": {
+        "subtitle": "sound.breakaction.dryfire",
+        "category": "player",
+        "sounds": [
+            {
+                "name": "guncraft:gundryfire",
+                "stream": false
+            }
+        ]
+    },
+
     "bullet.hit": {
         "subtitle": "sound.bullet.hit",
         "category": "player",
         "sounds": [
             {
                 "name": "guncraft:bullethit",
+                "stream": false
+            }
+        ]
+    },
+    "bullet.ricochet": {
+        "subtitle": "sound.bullet.ricochet",
+        "category": "player",
+        "sounds": [
+            {
+                "name": "guncraft:bulletricochet",
                 "stream": false
             }
         ]

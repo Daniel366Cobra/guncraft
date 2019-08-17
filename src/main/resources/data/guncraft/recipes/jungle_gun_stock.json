@@ -1,0 +1,19 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " SS",
+        "WW "
+    ],
+    "key": {
+        "S": {
+            "item": "minecraft:jungle_slab"
+        },        
+        "W": {
+            "item": "minecraft:jungle_planks"
+        }
+    },
+    "result": {
+        "item": "guncraft:stock/jungle_gun_stock",
+        "count": 1
+    }
+}

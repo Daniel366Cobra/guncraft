@@ -1,98 +1,176 @@
 package com.daniel366cobra.guncraft.entities;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
 import com.daniel366cobra.guncraft.damagesources.DamageProjectile;
+import com.daniel366cobra.guncraft.init.ModEntities;
 import com.daniel366cobra.guncraft.init.ModSounds;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.EntitySize;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.IProjectile;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.Pose;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.entity.projectile.ProjectileHelper;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.IPacket;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.network.play.server.SPacketChangeGameState;
+import net.minecraft.network.play.server.SChangeGameStatePacket;
+import net.minecraft.particles.BasicParticleType;
+import net.minecraft.particles.BlockParticleData;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntitySelectors;
-import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.Direction;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.ServerWorld;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.network.NetworkHooks;
 
-//UPDATED 1.12
+//UPDATED 1.14
 public class EntityGenericBullet extends Entity implements IProjectile
 {
-
-	@SuppressWarnings("unchecked")
-	private static final Predicate<Entity> BULLET_TARGETS = Predicates.and(EntitySelectors.NOT_SPECTATING, EntitySelectors.IS_ALIVE, new Predicate<Entity>()
-	{
-		@Override
-		public boolean apply(@Nullable Entity entity)
-		{
-			return entity.canBeCollidedWith();
-		}
-	});
-
 	private static final DataParameter<Boolean> INCENDIARY = EntityDataManager.<Boolean>createKey(EntityGenericBullet.class, DataSerializers.BOOLEAN);
+	private static final DataParameter<Byte> RICOCHET_TIMER = EntityDataManager.<Byte>createKey(EntityGenericBullet.class, DataSerializers.BYTE);
 
-	protected boolean inGround;
-	public Entity shootingEntity;
-	private int ticksInGround;
-	private int ticksInAir;
-	private double damage;
-	private double knockbackStrength;
+	private static final Map<Material, Float> materialDragMultipliers = fillMaterialDragValues();
 
-	public EntityGenericBullet(World world)
+	private static final HashSet<Material> passthroughMaterials = fillPassthroughMaterials();
+
+	private static final HashSet<Material> breakableMaterials = fillBreakableMaterials();
+
+	protected boolean inGround = false;
+	private boolean noRicochet = false;
+	public UUID shootingEntityUUID;
+	private int ticksInGround = 0;
+	private int ticksInAir = 0;
+	private double baseDamage = 2.0D;
+	private double knockbackStrength = 1.0D;
+	//private Vec3d previousPosition;
+
+	public EntityGenericBullet(EntityType<? extends EntityGenericBullet> type, World world)
 	{
-		super(world);
-		this.setDamage(2.0F);
-		this.setSize(0.25F, 0.25F);
+		super(type, world);
 	}
-	//Allows to set coordinates
+
+	public EntityGenericBullet(World world) {
+		super(ModEntities.genericbullet, world);
+		this.setRicochetTimer((byte) 0);
+	}
+
+	//Allows to set coordinates	
 	public EntityGenericBullet(World world, double x, double y, double z)
 	{
 		this(world);
 		this.setPosition(x, y, z);
 	}
 
-	public EntityGenericBullet(World world, EntityLivingBase shooter, double damage, double knockbackStrength, boolean incendiary)
+	public EntityGenericBullet(World world, LivingEntity shooter, double baseDamage, double knockbackStrength, boolean noRicochet, boolean incendiary)
 	{
 		this(world, shooter.posX, shooter.posY + shooter.getEyeHeight() - 0.1D, shooter.posZ);
-		this.shootingEntity = shooter;
-		this.setDamage(damage);
+		this.setShooter(shooter);
+		this.setDamage(baseDamage);
 		this.setKnockbackStrength(knockbackStrength);
+		this.setNoRicochet(noRicochet);
 		this.setIncendiary(incendiary);
+		//this.previousPosition = new Vec3d(this.posX, this.posY, this.posZ);
+		//		if (!this.world.isRemote())
+		//		{
+		//			GuncraftMod.LOGGER.info(String.format(
+		//					"Bullet Init: Current position: (%f, %f, %f)",
+		//					this.posX, this.posY, this.posZ
+		//					));
+		//			GuncraftMod.LOGGER.info(String.format(
+		//					"Bullet Init: Previous position: (%f, %f, %f)",
+		//					this.previousPosition.x, this.previousPosition.y, this.previousPosition.z
+		//					));
+		//		}
+	}
+
+	private static final HashMap<Material, Float> fillMaterialDragValues()
+	{
+		HashMap<Material, Float> materialDragMap = new HashMap<Material, Float>();
+
+		materialDragMap.put(Material.BAMBOO, 0.7f);
+		materialDragMap.put(Material.CACTUS, 0.6f);
+		materialDragMap.put(Material.CAKE, 0.8f);
+		materialDragMap.put(Material.CARPET, 0.8f);
+		materialDragMap.put(Material.GLASS, 0.5f);
+		materialDragMap.put(Material.GOURD, 0.6f);
+		materialDragMap.put(Material.LEAVES, 0.7f);
+		materialDragMap.put(Material.REDSTONE_LIGHT, 0.5f);
+		materialDragMap.put(Material.SNOW, 0.8f);
+		materialDragMap.put(Material.SNOW_BLOCK, 0.7f);
+		materialDragMap.put(Material.SPONGE, 0.6f);
+
+		materialDragMap.put(Material.WOOL, 0.6f);
+		return materialDragMap;
+	}
+
+
+
+	private static final HashSet<Material> fillBreakableMaterials()
+	{
+		HashSet<Material> breakableMaterialsSet = new HashSet<Material>();
+
+		breakableMaterialsSet.add(Material.GLASS);
+		breakableMaterialsSet.add(Material.GOURD);
+		breakableMaterialsSet.add(Material.CAKE);
+		breakableMaterialsSet.add(Material.REDSTONE_LIGHT);
+
+		return breakableMaterialsSet;
+	}
+
+	private static final HashSet<Material> fillPassthroughMaterials()
+	{
+		HashSet<Material> passthroughMaterialsSet = new HashSet<Material>();
+
+		passthroughMaterialsSet.addAll(fillBreakableMaterials());
+
+		passthroughMaterialsSet.add(Material.BAMBOO);
+		passthroughMaterialsSet.add(Material.CACTUS);
+		passthroughMaterialsSet.add(Material.CARPET);
+		passthroughMaterialsSet.add(Material.LEAVES);
+		passthroughMaterialsSet.add(Material.SNOW);
+		passthroughMaterialsSet.add(Material.SNOW_BLOCK);
+		passthroughMaterialsSet.add(Material.SPONGE);		
+		passthroughMaterialsSet.add(Material.WOOL);
+
+		return passthroughMaterialsSet;
 	}
 
 	/**
 	 * Checks if the entity is in range to render.
 	 */
-	@Override
-	@SideOnly(Side.CLIENT)
-	public boolean isInRangeToRenderDist(double distance)
-	{
-		double d0 = this.getEntityBoundingBox().getAverageEdgeLength() * 10.0D;
-
-		if (Double.isNaN(d0))
-		{
+	/**
+	 * Checks if the entity is in range to render.
+	 */
+	@OnlyIn(Dist.CLIENT)
+	public boolean isInRangeToRenderDist(double distance) {
+		double d0 = this.getBoundingBox().getAverageEdgeLength() * 10.0D;
+		if (Double.isNaN(d0)) {
 			d0 = 1.0D;
 		}
 
@@ -107,13 +185,13 @@ public class EntityGenericBullet extends Entity implements IProjectile
 		float f1 = -MathHelper.sin(pitch * 0.017453292F);
 		float f2 = MathHelper.cos(yaw * 0.017453292F) * MathHelper.cos(pitch * 0.017453292F);
 		this.shoot(f, f1, f2, velocity, inaccuracy);
-		this.motionX += shooter.motionX;
-		this.motionZ += shooter.motionZ;
+		Vec3d motion = new Vec3d(this.getMotion().x + shooter.getMotion().x, this.getMotion().y, this.getMotion().z + shooter.getMotion().z);
+		if (!shooter.onGround) {
 
-		if (!shooter.onGround)
-		{
-			this.motionY += shooter.motionY;
+			motion = new Vec3d(motion.x, motion.y + shooter.getMotion().y, motion.z);
 		}
+		this.setMotion(motion);
+
 	}
 
 	/**
@@ -132,9 +210,8 @@ public class EntityGenericBullet extends Entity implements IProjectile
 		x = x * velocity;
 		y = y * velocity;
 		z = z * velocity;
-		this.motionX = x;
-		this.motionY = y;
-		this.motionZ = z;
+		Vec3d motion = new Vec3d(x, y, z);
+		this.setMotion(motion);
 		float f1 = MathHelper.sqrt(x * x + z * z);
 		this.rotationYaw = (float)(MathHelper.atan2(x, z) * (180D / Math.PI));
 		this.rotationPitch = (float)(MathHelper.atan2(y, f1) * (180D / Math.PI));
@@ -147,7 +224,7 @@ public class EntityGenericBullet extends Entity implements IProjectile
 	 * Set the position and rotation values directly without any clamping.
 	 */
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void setPositionAndRotationDirect(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport)
 	{
 		this.setPosition(x, y, z);
@@ -158,12 +235,11 @@ public class EntityGenericBullet extends Entity implements IProjectile
 	 * Updates the entity motion clientside, called by packets from the server
 	 */
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void setVelocity(double x, double y, double z)
 	{
-		this.motionX = x;
-		this.motionY = y;
-		this.motionZ = z;
+		this.setMotion(x,y,z);	
+
 
 		if (this.prevRotationPitch == 0.0F && this.prevRotationYaw == 0.0F)
 		{
@@ -177,295 +253,402 @@ public class EntityGenericBullet extends Entity implements IProjectile
 		}
 	}
 
-	//Called to update the entity's position/logic.
-	@Override
-	public void onUpdate()
-	{
-		this.lastTickPosX = this.posX;
-		this.lastTickPosY = this.posY;
-		this.lastTickPosZ = this.posZ;
+	@Nullable
+	protected EntityRayTraceResult findEntitiesOnPath(Vec3d startVec, Vec3d endVec) {
+		return ProjectileHelper.func_221271_a(this.world, this, startVec, endVec, this.getBoundingBox().expand(this.getMotion()).grow(1.0D), (validTarget) -> {
+			return !validTarget.isSpectator() && validTarget.isAlive() && validTarget.canBeCollidedWith() && (validTarget != this.getShooter() || this.ticksInAir >= 3);
+		});
+	}
 
-		super.onUpdate();
-		//Kill if existing for more than 40 seconds to prevent spam
-		if (this.ticksExisted > 800)
+	public void tick() {
+		//		if (!this.world.isRemote())
+		//		{
+		//			if (this.previousPosition != null) {
+		//				GuncraftMod.LOGGER.info(String.format(
+		//						"Bullet Tick: Previous position: (%f, %f, %f)",
+		//						this.previousPosition.x, this.previousPosition.y, this.previousPosition.z
+		//						));
+		//			} else {
+		//				GuncraftMod.LOGGER.info("No previous position set");
+		//			}
+		//		}
+
+		//To prevent "phasing" through blocks and sticking after a ricochet
+		if((this.getRicochetTimer()) > 0 && (!this.world.isRemote))
 		{
-			this.setDead();
+			this.setRicochetTimer((byte) (this.getRicochetTimer() - (byte)1));
 		}
-		if (this.prevRotationPitch == 0.0F && this.prevRotationYaw == 0.0F)
-		{
-			float f = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-			this.rotationYaw = (float)(MathHelper.atan2(this.motionX, this.motionZ) * (180D / Math.PI));
-			this.rotationPitch = (float)(MathHelper.atan2(this.motionY, f) * (180D / Math.PI));
+
+		super.tick();
+
+		++this.ticksExisted;
+
+		this.tryDespawn();     
+
+		Vec3d motionVec = this.getMotion();
+		//Set initial values for previous rotations, I guess
+		if (this.prevRotationPitch == 0.0F && this.prevRotationYaw == 0.0F) {
+			float horizVelocity = MathHelper.sqrt(motionVec.x * motionVec.x + motionVec.z * motionVec.z);
+			this.rotationYaw = (float)(MathHelper.atan2(motionVec.x, motionVec.z) * (double)(180F / (float)Math.PI));
+			this.rotationPitch = (float)(MathHelper.atan2(motionVec.y, (double)horizVelocity) * (double)(180F / (float)Math.PI));
 			this.prevRotationYaw = this.rotationYaw;
 			this.prevRotationPitch = this.rotationPitch;
 		}
 
-		if (this.inGround) //If in ground - decay quickly
-		{
-
-			this.motionX = 0.0D;
-			this.motionY = 0.0D;
-			this.motionZ = 0.0D;
-
+		if (this.inGround) {
+			this.ticksInAir = 0;
 			++this.ticksInGround;
-
-			if (this.ticksInGround >= 5)
-			{
-				this.setDead();
-			}
-
-
-
+			this.setMotion(Vec3d.ZERO);
 		}
-		else //In air
-		{
+		else
+		{    	 
+			this.ticksInGround = 0;
 			++this.ticksInAir;
-			Vec3d curPos = new Vec3d(this.posX, this.posY, this.posZ);
-			Vec3d nextPos = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
-			RayTraceResult traceOnPath = this.world.rayTraceBlocks(curPos, nextPos, false, true, false);
-			//If hit something
-			if (traceOnPath != null && traceOnPath.typeOfHit != Type.MISS)
-			{
-				nextPos = new Vec3d(traceOnPath.hitVec.x, traceOnPath.hitVec.y, traceOnPath.hitVec.z);
+			Vec3d positionVec = new Vec3d(this.posX, this.posY, this.posZ);
+			Vec3d nextPositionVec = positionVec.add(motionVec);
+			RayTraceResult obstacleTraceResult = this.world.rayTraceBlocks(new RayTraceContext(positionVec, nextPositionVec, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, this));
+			if (obstacleTraceResult.getType() != RayTraceResult.Type.MISS) {
+				nextPositionVec = obstacleTraceResult.getHitVec();
 			}
 
-			Entity entityHit = this.findEntityOnPath(curPos, nextPos);
-
-			if (entityHit != null)
-			{
-				traceOnPath = new RayTraceResult(entityHit);
-			}
-
-			if (traceOnPath != null && traceOnPath.entityHit instanceof EntityPlayer)
-			{
-				EntityPlayer entityplayer = (EntityPlayer)traceOnPath.entityHit;
-
-				if ((this.shootingEntity instanceof EntityPlayer && !((EntityPlayer)this.shootingEntity).canAttackPlayer(entityplayer)) || entityplayer == this.shootingEntity)
-				{
-					traceOnPath = null;
+			while(this.isAlive()) {
+				EntityRayTraceResult entityraytraceresult = this.findEntitiesOnPath(positionVec, nextPositionVec);
+				if (entityraytraceresult != null) {
+					obstacleTraceResult = entityraytraceresult;
 				}
+
+				if (obstacleTraceResult != null && obstacleTraceResult.getType() == RayTraceResult.Type.ENTITY) {
+					Entity entity = ((EntityRayTraceResult)obstacleTraceResult).getEntity();
+					Entity entity1 = this.getShooter();
+					if (entity instanceof PlayerEntity && entity1 instanceof PlayerEntity && !((PlayerEntity)entity1).canAttackPlayer((PlayerEntity)entity)) {
+						obstacleTraceResult = null;
+						entityraytraceresult = null;
+					}
+				}
+
+				if (obstacleTraceResult != null) {
+					this.onHit(obstacleTraceResult);
+					this.isAirBorne = true;
+				}
+
+				if (entityraytraceresult == null) {
+					break;
+				}
+
+				obstacleTraceResult = null;
 			}
 
-			if (traceOnPath != null)
+			motionVec = this.getMotion();
+			double motionX = motionVec.x;
+			double motionY = motionVec.y;
+			double motionZ = motionVec.z;
+
+			BasicParticleType currenttrail = this.isIncendiary()? ParticleTypes.FLAME : ParticleTypes.END_ROD;
+
+			if (this.ticksExisted > 2)
 			{
-				this.onHit(traceOnPath);
-			}
+				this.world.addParticle(currenttrail, true, this.posX, this.posY, this.posZ, -this.getMotion().x * 0.05D, -this.getMotion().y * 0.05D, -this.getMotion().z * 0.05D);
+				this.world.addParticle(currenttrail, true, this.lastTickPosX, this.lastTickPosY, this.lastTickPosZ, -this.getMotion().x * 0.05D, -this.getMotion().y * 0.05D, -this.getMotion().z * 0.05D);
 
-			EnumParticleTypes currenttrail = this.ticksExisted < 2? EnumParticleTypes.EXPLOSION_NORMAL : this.isIncendiary()? EnumParticleTypes.FLAME : EnumParticleTypes.CRIT;
+			}			
 
-			for (int k = 0; k < 8; ++k)
-			{
-				this.world.spawnParticle(currenttrail, this.posX + this.motionX * k / 8.0D, this.posY + this.motionY * k / 8.0D, this.posZ + this.motionZ * k / 8.0D, -this.motionX * 0.05D, -this.motionY * 0.05D, -this.motionZ * 0.05D);
-			}
+			this.posX += motionX;
+			this.posY += motionY;
+			this.posZ += motionZ;
 
-			this.posX += this.motionX;
-			this.posY += this.motionY;
-			this.posZ += this.motionZ;
+			double horizVel = MathHelper.sqrt(motionX * motionX + motionZ * motionZ);
 
-			//Probably something to do with facing direction??? This is confusing.
-			float XYVelMagn = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-			this.rotationYaw = (float)(MathHelper.atan2(this.motionX, this.motionZ) * (180D / Math.PI));
+			this.rotationYaw = (float)(MathHelper.atan2(motionX, motionZ) * (180D / Math.PI));
 
-			for (this.rotationPitch =
-					(float)(MathHelper.atan2(this.motionY, XYVelMagn)
-							* (180D / Math.PI));
-					this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F)
-			{
+			for(this.rotationPitch = (float)(MathHelper.atan2(motionY, horizVel) * (180D / Math.PI)); this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F) {
 				;
 			}
 
-			while (this.rotationPitch - this.prevRotationPitch >= 180.0F)
-			{
+			while(this.rotationPitch - this.prevRotationPitch >= 180.0F) {
 				this.prevRotationPitch += 360.0F;
 			}
 
-			while (this.rotationYaw - this.prevRotationYaw < -180.0F)
-			{
+			while(this.rotationYaw - this.prevRotationYaw < -180.0F) {
 				this.prevRotationYaw -= 360.0F;
 			}
 
-			while (this.rotationYaw - this.prevRotationYaw >= 180.0F)
-			{
+			while(this.rotationYaw - this.prevRotationYaw >= 180.0F) {
 				this.prevRotationYaw += 360.0F;
 			}
-			//End of confusing code block
 
-			//Update Euler angles
-			this.rotationPitch = this.prevRotationPitch + (this.rotationPitch - this.prevRotationPitch) * 0.2F;
-			this.rotationYaw = this.prevRotationYaw + (this.rotationYaw - this.prevRotationYaw) * 0.2F;
-			//Apply physics
-			float drag = 0.99F;
-			float freefallAccel = this.getGravityVelocity();
-			if (this.isInWater())
-			{
-				for (int i = 0; i < 4; ++i)
-				{
-					this.world.spawnParticle(EnumParticleTypes.WATER_BUBBLE, this.posX, this.posY, this.posZ, -this.motionX * 0.25D, -this.motionY * 0.25D, -this.motionZ * 0.25D);
+			this.rotationPitch = MathHelper.lerp(0.2F, this.prevRotationPitch, this.rotationPitch);
+			this.rotationYaw = MathHelper.lerp(0.2F, this.prevRotationYaw, this.rotationYaw);
+
+			double drag = this.getAirDrag();
+
+			if (this.isInWater()) {
+				for(int j = 0; j < 4; ++j) {
+
+					this.world.addParticle(ParticleTypes.BUBBLE, this.posX - motionX * 0.25D, this.posY - motionY * 0.25D, this.posZ - motionZ * 0.25D, motionX, motionY, motionZ);
 				}
 
-				drag = 0.6F;
+				drag = this.getWaterDrag();
 			}
 
-			//Slowing down due to drag
-			this.motionX *= drag;
-			this.motionY *= drag;
-			this.motionZ *= drag;
+			motionVec = motionVec.scale(drag);
 
-			if (!this.hasNoGravity())
-			{
-				this.motionY -= freefallAccel;
+			if (!this.hasNoGravity()) {
+				motionVec = new Vec3d(motionVec.x, motionVec.y - this.getGravityAccel(), motionVec.z);
 			}
 
+			this.setMotion(motionVec);
 			this.setPosition(this.posX, this.posY, this.posZ);
+			this.doBlockCollisions();
+			//this.previousPosition = new Vec3d(this.posX, this.posY, this.posZ);
 		}
 	}
 
-	//Gets the amount of gravity to apply to the thrown entity with each tick.
-	protected float getGravityVelocity()
+
+	/**
+	 * Despawn after 5 ticks in ground or 200 ticks total lifetime
+	 */
+	protected void tryDespawn() {
+
+		if (!this.world.isRemote) {	   
+
+			if ((this.ticksInGround >= 5) || (this.ticksExisted > 200))
+			{
+				this.remove();
+			}
+		}
+	}
+
+
+	/**
+	 * Get the gravitational acceleration for the projectile.
+	 */
+	protected float getGravityAccel()
 	{
 		return 0.01F;
 	}
 
-	//Called when the bullet hits a block or an entity
-	protected void onHit(RayTraceResult result)
-	{
-		World curWorld = this.world;
-		if (result.typeOfHit == Type.BLOCK) //Calculate interaction, bounce and deceleration
+	/**
+	 * Called when the projectile impacts something.
+	 */
+	protected void onHit(RayTraceResult hitResult)
+	{		
+		if (hitResult.getType() == Type.BLOCK) //Calculate interaction, bounce and deceleration
 		{
-			float vel = (float)Math.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
-
-			BlockPos hitBlockPos = result.getBlockPos();
-			IBlockState hitBlockState = curWorld.getBlockState(hitBlockPos);
-
-
-			if ((hitBlockState.getMaterial() == Material.GLASS || hitBlockState.getMaterial() == Material.LEAVES || hitBlockState.getMaterial() == Material.GOURD) && vel > 1.0F)
-			{//break through glass, gourds and leaves
-
-				this.motionX *= 0.5D;
-				this.motionY *= 0.5D;
-				this.motionZ *= 0.5D;
-
-				if (!curWorld.isRemote)
-				{
-					curWorld.destroyBlock(hitBlockPos, false);
-				}
-			}
-			else
-			{
-
-				curWorld.playSound(null, this.posX, this.posY, this.posZ, ModSounds.bullethit, SoundCategory.PLAYERS, 1.0F, 1.0F);
-				this.inGround = true;
-				//Have a 50% chance to ignite a hit block if incendiary
-				if(this.isIncendiary() && this.rand.nextBoolean() && !curWorld.isRemote)
-				{
-					if (curWorld.isAirBlock(hitBlockPos.offset(result.sideHit)))
-					{
-						curWorld.setBlockState(hitBlockPos.offset(result.sideHit), Blocks.FIRE.getDefaultState(), 3);
-					}
-				}
-
-				for (int k = 0; k <= 10; k++)
-				{
-					curWorld.spawnParticle(EnumParticleTypes.BLOCK_DUST, this.posX, this.posY, this.posZ, -this.motionX * 0.1F + this.rand.nextFloat(), -this.motionY * 0.1F + this.rand.nextFloat(), -this.motionZ * 0.1F + this.rand.nextFloat(), new int[] {Block.getIdFromBlock(hitBlockState.getBlock())});
-				}
-			}
+			processBlockHit(hitResult);
 		}
-		else if (result.typeOfHit == Type.ENTITY)
+		else if (hitResult.getType() == Type.ENTITY)
 		{
-			Entity entityHit = result.entityHit;
-
-			DamageSource bulletdamage;
-
-			if (this.shootingEntity == null)
-			{
-				bulletdamage  = new DamageProjectile("bullet", this, null);
-			}
-			else
-			{
-				bulletdamage = new DamageProjectile("bullet", this, this.shootingEntity);
-			}
-
-			if(this.isIncendiary() && entityHit != this.shootingEntity && this.ticksExisted > 2)
-			{
-				entityHit.setFire(10);
-			}
-
-			double totalDamage = this.getDamage();
-
-			//Headshot and close-range hit detection
-			if ((this.posY >= (entityHit.posY + entityHit.height * 0.7F)) || (this.ticksExisted <= 3))
-			{
-				totalDamage *= 10.0D;
-			}
-
-			if (entityHit.attackEntityFrom(bulletdamage, (float)totalDamage))
-			{
-				//Drop hurt resistance time to zero - for usage in shotguns
-				entityHit.hurtResistantTime = 0;
-
-				if (entityHit instanceof EntityLivingBase)
-				{
-					EntityLivingBase entityLivingHit = (EntityLivingBase)entityHit;
-
-
-					if (this.knockbackStrength > 0)
-					{
-						float horizVel = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-
-						if (horizVel > 0.0F)
-						{
-							entityLivingHit.addVelocity(this.motionX * this.knockbackStrength * 0.3D / horizVel, 0.1D, this.motionZ * this.knockbackStrength * 0.6D / horizVel);
-						}
-					}
-
-
-
-					if (this.shootingEntity != null && entityLivingHit != this.shootingEntity && entityLivingHit instanceof EntityPlayer && this.shootingEntity instanceof EntityPlayerMP)
-					{
-						((EntityPlayerMP)this.shootingEntity).connection.sendPacket(new SPacketChangeGameState(6, 0.0F));
-					}
-				}
-
-				this.setDead();
-			}
-
+			processEntityHit(hitResult);		
 		}
 		else
 		{
 			return;
 		}
+
 	}
 
-	@Nullable
-	protected Entity findEntityOnPath(Vec3d start, Vec3d end)
-	{
-		Entity entity = null;
-		List<Entity> list = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox().expand(this.motionX, this.motionY, this.motionZ).grow(1.0D), BULLET_TARGETS);
-		double d0 = 0.0D;
+	/**
+	 * Processes block impacts.
+	 */
+	protected void processBlockHit(RayTraceResult hitResult) {
 
-		for (int i = 0; i < list.size(); ++i)
-		{
-			Entity entity1 = list.get(i);
+		World curWorld = this.world;
 
-			if (entity1 != this.shootingEntity || this.ticksInAir >= 5)
+		Vec3d curMotion = this.getMotion();
+
+		double motionX = curMotion.x;
+		double motionY = curMotion.y;
+		double motionZ = curMotion.z;
+
+		double velMagnitude = Math.sqrt(motionX * motionX + motionY * motionY + motionZ * motionZ);
+
+		BlockRayTraceResult hitBlockResult = (BlockRayTraceResult)hitResult;
+
+		BlockPos hitBlockPos = hitBlockResult.getPos();
+		BlockState hitBlockState = curWorld.getBlockState(hitBlockPos);
+		Material hitMaterial = hitBlockState.getMaterial();
+
+		boolean hitPassthroughMaterial = passthroughMaterials.contains(hitMaterial);
+
+		boolean hitBreakableMaterial = breakableMaterials.contains(hitMaterial);
+
+		if (hitPassthroughMaterial && velMagnitude > 1.0D)
+		{//Slow down in passthrough blocks
+			this.inGround = false;
+
+			float dragMultiplier = materialDragMultipliers.get(hitMaterial);
+
+			motionX *= dragMultiplier;
+			motionY *= dragMultiplier;
+			motionZ *= dragMultiplier;
+			//double velNew = Math.sqrt(motionX * motionX + motionY * motionY + motionZ * motionZ);
+
+			//GuncraftMod.LOGGER.info("Changed velocity from " + velMagnitude + " to " + velNew);
+
+			//Destroy passthrough breakable blocks
+			if (hitBreakableMaterial && !curWorld.isRemote)
 			{
-				AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox().grow(0.3D);
-				RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(start, end);
+				curWorld.destroyBlock(hitBlockPos, false);
+			}
+		}
+		else
 
-				if (raytraceresult != null)
+		{		
+			if (!this.isNoRicochet())
+			{
+				//Ricochet detection
+				double hitAngle = 0.0D;
+				double vecHitInPlane = 0.0D;
+				double vecHitNormal = 0.0D;
+				float multX = 1.0F;
+				float multY = 1.0F;
+				float multZ = 1.0F;
+				//Which side of block did the entity hit?
+				boolean hitAlongX = (hitBlockResult.getFace() == Direction.WEST || hitBlockResult.getFace() == Direction.EAST);
+				boolean hitAlongZ = (hitBlockResult.getFace() == Direction.NORTH || hitBlockResult.getFace() == Direction.SOUTH);
+				boolean hitAlongY = (hitBlockResult.getFace() == Direction.DOWN || hitBlockResult.getFace() == Direction.UP);
+
+				if(hitAlongX)
 				{
-					double d1 = start.squareDistanceTo(raytraceresult.hitVec);
+					vecHitInPlane = Math.sqrt(motionY * motionY + motionZ * motionZ);
+					vecHitNormal = motionX;
+					multX = -0.5F;
+					multY = 0.5F;
+					multZ = 0.5F;
+				}
+				else if (hitAlongZ)
+				{
+					vecHitInPlane = Math.sqrt(motionX * motionX + motionY * motionY);
+					vecHitNormal = motionZ;
+					multX = 0.5F;
+					multY = 0.5F;
+					multZ = -0.5F;
+				}
+				else if (hitAlongY)
+				{
+					vecHitInPlane = Math.sqrt(motionX * motionX + motionZ * motionZ);
+					vecHitNormal = motionY;
+					multX = 0.5F;
+					multY = -0.5F;
+					multZ = 0.5F;
+				}
+				//Compute angle from cathets
+				hitAngle = Math.abs(Math.atan2(vecHitNormal, vecHitInPlane) * 180.0D / Math.PI);
 
-					if (d1 < d0 || d0 == 0.0D)
+				if (hitAngle <= 30.0D && velMagnitude > 3.0F) //Ricochet
+				{
+					if (!curWorld.isRemote)
 					{
-						entity = entity1;
-						d0 = d1;
+						this.setRicochetTimer((byte) 10);
+					}
+					curWorld.playSound(null, this.posX, this.posY, this.posZ, ModSounds.bulletricochet, SoundCategory.PLAYERS, 1.0F, 1.0F);
+					motionX *= multX;
+					motionY *= multY;
+					motionZ *= multZ;					
+				}
+			}
+			else //embed in block
+			{
+				if (this.getRicochetTimer() <= 0 || velMagnitude <= 3.0F)
+				{
+
+					curWorld.playSound(null, this.posX, this.posY, this.posZ, ModSounds.bullethit, SoundCategory.PLAYERS, 1.0F, 1.0F);
+					this.inGround = true;
+					//Have a 50% chance to ignite a hit block if incendiary
+					if(this.isIncendiary() && this.rand.nextBoolean() && !curWorld.isRemote)
+					{
+						if (curWorld.isAirBlock(hitBlockPos.offset(hitBlockResult.getFace())))
+						{
+							curWorld.setBlockState(hitBlockPos.offset(hitBlockResult.getFace()), Blocks.FIRE.getDefaultState(), 3);
+						}
+					}
+
+					for (int k = 0; k <= 5; k++)
+					{
+						curWorld.addParticle(new BlockParticleData(ParticleTypes.BLOCK, hitBlockState), this.posX, this.posY, this.posZ, -this.getMotion().x * 0.1F + this.rand.nextFloat(), -this.getMotion().y * 0.1F + this.rand.nextFloat(), -this.getMotion().z * 0.1F + this.rand.nextFloat());
 					}
 				}
 			}
 		}
+		this.setMotion(new Vec3d(motionX, motionY, motionZ));
+	}
 
-		return entity;
+	/**
+	 * Processes entity impacts.
+	 */
+	protected void processEntityHit(RayTraceResult hitResult) {		
+
+		EntityRayTraceResult hitEntityResult = (EntityRayTraceResult)hitResult;
+
+		Entity entityHit = hitEntityResult.getEntity();
+		Entity shooter = this.getShooter();
+
+		DamageSource bulletdamage;
+
+		if (shooter == null)
+		{
+			bulletdamage  = new DamageProjectile("bullet", this, null);
+		}
+		else
+		{
+			bulletdamage = new DamageProjectile("bullet", this, shooter);
+			if (entityHit instanceof LivingEntity) {
+				((LivingEntity)shooter).setLastAttackedEntity(entityHit);
+			}
+		}
+
+		if(this.isIncendiary() && entityHit != shooter && this.ticksExisted > 2)
+		{
+			entityHit.setFire(10);
+		}
+
+		double totalDamage = this.getBaseDamage() * this.getMotion().length();
+
+		//Headshot and close-range hit detection
+
+		if (((this.posY + this.getHeight() * 0.5F) >= (entityHit.posY + entityHit.getHeight() * 0.75F)) || (this.ticksExisted <= 3))
+		{
+			totalDamage *= 2.0D;			
+		}
+
+		if (entityHit.attackEntityFrom(bulletdamage, (float)totalDamage))
+		{
+			if (entityHit instanceof LivingEntity)				
+			{
+				//Drop hurt resistance time to zero - for usage in shotguns
+				entityHit.hurtResistantTime = 0;
+
+				LivingEntity entityLivingHit = (LivingEntity)entityHit;
+
+
+				if (this.knockbackStrength > 0)
+				{
+					float horizVel = MathHelper.sqrt(this.getMotion().x * this.getMotion().x + this.getMotion().z * this.getMotion().z);
+
+					if (horizVel > 0.0F)
+					{
+						entityLivingHit.addVelocity(this.getMotion().x * this.knockbackStrength * 0.3D / horizVel, 0.1D, this.getMotion().z * this.knockbackStrength * 0.6D / horizVel);
+					}
+				}
+
+
+
+				if (this.getShooter() != null && entityLivingHit != this.getShooter() && entityLivingHit instanceof PlayerEntity && this.getShooter() instanceof ServerPlayerEntity)
+				{
+					((ServerPlayerEntity)this.getShooter()).connection.sendPacket(new SChangeGameStatePacket(6, 0.0F));
+				}				
+			}
+
+		}
+		this.remove();
+
+	}
+
+	@Nullable
+	protected EntityRayTraceResult traceEntitiesOnPath(Vec3d startVec, Vec3d endVec) {
+		return ProjectileHelper.func_221271_a(this.world, this, startVec, endVec, this.getBoundingBox().expand(this.getMotion()).grow(1.0D), (target) -> {
+			return !target.isSpectator() && target.isAlive() && target.canBeCollidedWith() && (target != this.getShooter() || this.ticksInAir >= 3);
+		});
 	}
 
 
@@ -474,28 +657,32 @@ public class EntityGenericBullet extends Entity implements IProjectile
 	 * (abstract) Protected helper method to write subclass entity data to NBT.
 	 */
 	@Override
-	public void writeEntityToNBT(NBTTagCompound compound)
+	public void writeAdditional(CompoundNBT compound)
 	{
-		compound.setShort("life", (short)this.ticksInGround);
-		compound.setByte("inGround", (byte)(this.inGround ? 1 : 0));
-		compound.setDouble("damage", this.damage);
-		compound.setBoolean("incendiary", this.isIncendiary());
+		compound.putShort("groundlife", (short)this.ticksInGround);
+		compound.putShort("life", (short)this.ticksExisted);
+		compound.putByte("inGround", (byte)(this.inGround ? 1 : 0));
+		compound.putDouble("damage", this.baseDamage);
+		compound.putBoolean("incendiary", this.isIncendiary());
+		compound.putByte("ricochet", this.getRicochetTimer());
 	}
 
 	/**
 	 * (abstract) Protected helper method to read subclass entity data from NBT.
 	 */
 	@Override
-	public void readEntityFromNBT(NBTTagCompound compound)
+	public void readAdditional(CompoundNBT compound)
 	{
-		this.ticksInGround = compound.getShort("life");
+		this.ticksInGround = compound.getShort("groundlife");
+		this.ticksExisted = compound.getShort("life");
 		this.inGround = compound.getByte("inGround") == 1;
 
-		if (compound.hasKey("damage", 99))
+		if (compound.contains("damage", 99))
 		{
-			this.damage = compound.getDouble("damage");
+			this.baseDamage = compound.getDouble("damage");
 		}
 		this.setIncendiary(compound.getBoolean("incendiary"));
+		this.setRicochetTimer(compound.getByte("ricochet"));
 	}
 
 
@@ -509,14 +696,18 @@ public class EntityGenericBullet extends Entity implements IProjectile
 		return false;
 	}
 
-	public void setDamage(double damage)
-	{
-		this.damage = damage;
+	protected float getEyeHeight(Pose pose, EntitySize entitySize) {
+		return 0.0F;
 	}
 
-	public double getDamage()
+	public void setDamage(double damage)
 	{
-		return this.damage;
+		this.baseDamage = damage;
+	}
+
+	public double getBaseDamage()
+	{
+		return this.baseDamage;
 	}
 
 	/**
@@ -536,23 +727,62 @@ public class EntityGenericBullet extends Entity implements IProjectile
 		return false;
 	}
 
-	@Override
-	public float getEyeHeight()
-	{
-		return 0.0F;
+	@Nullable
+	public Entity getShooter() {
+		return this.shootingEntityUUID != null && this.world instanceof ServerWorld ? ((ServerWorld)this.world).getEntityByUuid(this.shootingEntityUUID) : null;
 	}
-	@Override
-	protected void entityInit()
-	{
-		this.dataManager.register(INCENDIARY, Boolean.valueOf(false));
+
+	public void setShooter(@Nullable Entity shooter) {
+		this.shootingEntityUUID = shooter == null ? null : shooter.getUniqueID();	      
 
 	}
+
 	public boolean isIncendiary()
 	{
 		return this.dataManager.get(INCENDIARY);
 	}
+
 	public void setIncendiary(boolean incendiary)
 	{
 		this.dataManager.set(INCENDIARY, incendiary);
+	}
+
+	private byte getRicochetTimer()
+	{
+		return this.dataManager.get(RICOCHET_TIMER);
+	}
+
+	private void setRicochetTimer(Byte ricochetTimer)
+	{
+		this.dataManager.set(RICOCHET_TIMER, ricochetTimer);
+	}
+
+	protected float getWaterDrag() {
+		return 0.6F;
+	}
+
+	protected float getAirDrag() {
+		return 0.99F;
+	}
+
+	protected void registerData() {
+
+		this.dataManager.register(INCENDIARY, Boolean.valueOf(false));
+		this.dataManager.register(RICOCHET_TIMER, Byte.valueOf((byte) 0));
+
+	}
+
+
+	@Override
+	public IPacket<?> createSpawnPacket() {
+		return NetworkHooks.getEntitySpawningPacket(this);
+	}
+
+	public boolean isNoRicochet() {
+		return noRicochet;
+	}
+
+	public void setNoRicochet(boolean noRicochet) {
+		this.noRicochet = noRicochet;
 	}
 }
